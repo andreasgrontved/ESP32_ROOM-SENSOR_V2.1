@@ -1,31 +1,28 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart, sensor
-from esphome.const import ICON_EYE, UNIT_EMPTY
+from esphome.const import ICON_EMPTY, UNIT_EMPTY
 
 DEPENDENCIES = ["uart"]
 
-# Define the namespace for the component
-dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
-DFRobotC1001Sensor = dfrobot_c1001_ns.class_(
-    "DFRobotC1001Sensor", cg.PollingComponent, uart.UARTDevice
+empty_uart_sensor_ns = cg.esphome_ns.namespace("dfrobot_c1001")
+EmptyUARTSensor = empty_uart_sensor_ns.class_(
+    "dfrobot_c1001", cg.PollingComponent, uart.UARTDevice
 )
 
-# Define the configuration schema
 CONFIG_SCHEMA = (
     sensor.sensor_schema(
-        DFRobotC1001Sensor,
+        EmptyUARTSensor,
         unit_of_measurement=UNIT_EMPTY,
-        icon=ICON_EYE,
-        accuracy_decimals=0,
+        icon=ICON_EMPTY,
+        accuracy_decimals=1,
     )
-    .extend(cv.polling_component_schema("1s"))  # Poll every 1 second for presence detection
+    .extend(cv.polling_component_schema("60s"))
     .extend(uart.UART_DEVICE_SCHEMA)
 )
 
+
 async def to_code(config):
-    # Initialize the sensor
-    var = await cg.get_variable(config[CONF_ID])
+    var = await sensor.new_sensor(config)
     await cg.register_component(var, config)
-    await sensor.register_sensor(var, config)
     await uart.register_uart_device(var, config)
