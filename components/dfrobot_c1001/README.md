@@ -1,12 +1,11 @@
 ```yaml
 # example configuration:
 
-sensor:
-  - platform: empty_uart_sensor
-    name: Empty UART sensor
+dfrobot_c1001_component:
+  id: dfrobot_c1001
 
 uart:
-  tx_pin: D0
-  rx_pin: D1
-  baud_rate: 9600
+  tx_pin: 17
+  rx_pin: 4
+  baud_rate: 115200
 ```
