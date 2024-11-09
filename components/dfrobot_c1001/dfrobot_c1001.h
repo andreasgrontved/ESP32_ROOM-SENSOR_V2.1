@@ -7,10 +7,9 @@
 namespace esphome {
 namespace dfrobot_c1001 {
 
-class dfrobot_c1001 : public uart::UARTDevice, public Component {
+class DFRobotC1001Component : public Component, public uart::UARTDevice {
  public:
-    // Constructor, initializes UART device with the parent component
-    DFRobotC1001Component(uart::UARTComponent *parent) : uart::UARTDevice(parent), hu(&Serial1) {}
+  DFRobotC1001Component(uart::UARTComponent *parent) : uart::UARTDevice(parent), hu(&Serial1) {}
 
     // Standard ESPHome methods
     void setup() override;
@@ -28,13 +27,13 @@ class dfrobot_c1001 : public uart::UARTDevice, public Component {
     int get_fall_status();
     int get_residency_status();
 
- private:
-    DFRobot_HumanDetection hu;
+ protected:
+  DFRobot_HumanDetection hu;
 
     // Default configuration values
-    bool led_enabled_{true};           // LED initially enabled
-    int fall_sensitivity_{3};          // Default fall sensitivity (range: 0-3)
-    int installation_height_{270};     // Default installation height in cm
+    bool led_enabled_{false};           // LED initially enabled
+    int fall_sensitivity_{0};          // Default fall sensitivity (range: 0-3)
+    int installation_height_{200};     // Default installation height in cm
 };
 
 }  // namespace dfrobot_c1001
