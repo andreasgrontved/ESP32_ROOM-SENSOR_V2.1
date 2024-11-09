@@ -1,14 +1,15 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart
-from esphome.const import CONF_ID, CONF_HEIGHT, CONF_SENSITIVITY, CONF_FALL_TIME
+from esphome.const import CONF_ID, CONF_HEIGHT, CONF_SENSITIVITY
+
+# Manually define CONF_FALL_TIME
+CONF_FALL_TIME = "fall_time"
 
 DEPENDENCIES = ["uart"]
 
 dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
-DFRobotC1001 = dfrobot_c1001_ns.class_(
-    "DFRobotC1001", cg.Component, uart.UARTDevice
-)
+DFRobotC1001 = dfrobot_c1001_ns.class_("DFRobotC1001", cg.Component, uart.UARTDevice)
 
 CONFIG_SCHEMA = (
     cv.Schema({
