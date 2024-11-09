@@ -1,9 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart
-from esphome.const import CONF_ID
 from esphome.const import CONF_ID, CONF_HEIGHT, CONF_SENSITIVITY, CONF_FALL_TIME
-
 
 DEPENDENCIES = ["uart"]
 
@@ -23,7 +21,6 @@ CONFIG_SCHEMA = (
     .extend(uart.UART_DEVICE_SCHEMA)
 )
 
-
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
@@ -32,10 +29,3 @@ async def to_code(config):
     cg.add(var.set_installation_height(config[CONF_HEIGHT]))
     cg.add(var.set_fall_sensitivity(config[CONF_SENSITIVITY]))
     cg.add(var.set_fall_time(config[CONF_FALL_TIME]))
-
-
-
-from esphome.const import CONF_ID, CONF_HEIGHT, CONF_SENSITIVITY, CONF_FALL_TIME
-
-
-
