@@ -6,7 +6,8 @@ namespace dfrobot_c1001 {
 
 static const char *TAG = "dfrobot_c1001.component";
 
-DFRobotC1001::DFRobotC1001(UARTComponent *parent) : UARTDevice(parent), hu_(parent) {}
+DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent) : UARTDevice(parent), hu_(parent) {}
+
 
 void DFRobotC1001::setup() {
   ESP_LOGCONFIG(TAG, "Setting up DFRobot C1001...");

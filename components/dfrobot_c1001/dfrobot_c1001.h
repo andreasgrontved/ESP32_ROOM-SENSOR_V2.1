@@ -10,7 +10,8 @@ namespace dfrobot_c1001 {
 
 class DFRobotC1001 : public uart::UARTDevice, public Component {
  public:
-  DFRobotC1001(UARTComponent *parent);
+DFRobotC1001(uart::UARTComponent *parent);
+
 
   void setup() override;
   void loop() override;
