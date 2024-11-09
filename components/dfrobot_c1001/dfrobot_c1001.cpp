@@ -6,7 +6,8 @@ namespace dfrobot_c1001 {
 
 static const char *TAG = "dfrobot_c1001.component";
 
-DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent) : UARTDevice(parent), hu_(parent) {}
+DFRobotC1001::DFRobotC1001(HardwareSerial* serial) : UARTDevice(serial), hu_(serial) {}
+
 
 
 void DFRobotC1001::setup() {
