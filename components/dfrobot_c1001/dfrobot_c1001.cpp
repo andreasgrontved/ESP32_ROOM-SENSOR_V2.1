@@ -6,7 +6,9 @@ namespace dfrobot_c1001 {
 
 static const char *TAG = "dfrobot_c1001.component";
 
-void dfrobot_c1001::setup() {
+DFRobotC1001Component::DFRobotC1001Component(uart::UARTComponent *parent) : uart::UARTDevice(parent), hu(&Serial1) {}
+
+void DFRobotC1001Component::setup() {
   ESP_LOGI(TAG, "Setting up DFRobot C1001 component...");
 
   Serial1.begin(115200, SERIAL_8N1, 4, 17);  // RX: GPIO4, TX: GPIO17
@@ -24,12 +26,12 @@ void dfrobot_c1001::setup() {
   this->set_installation_height(installation_height_);
 }
 
-void dfrobot_c1001::loop() {
-
+void DFRobotC1001Component::loop() {
+  // Add any continuous monitoring or periodic checks here if necessary
 }
 
-void dfrobot_c1001::dump_config(){
-    ESP_LOGCONFIG(TAG, "dfrobot_c1001");
+void DFRobotC1001Component::dump_config() {
+    ESP_LOGCONFIG(TAG, "DFRobot C1001 Configuration");
 }
 
 void DFRobotC1001Component::set_led_enabled(bool enabled) {
@@ -63,7 +65,6 @@ int DFRobotC1001Component::get_fall_status() {
 int DFRobotC1001Component::get_residency_status() {
   return hu.getFallData(hu.estaticResidencyState);
 }
-
 
 }  // namespace dfrobot_c1001
 }  // namespace esphome
