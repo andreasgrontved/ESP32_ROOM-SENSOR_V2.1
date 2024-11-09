@@ -6,64 +6,89 @@ namespace dfrobot_c1001 {
 
 static const char *TAG = "dfrobot_c1001.component";
 
-DFRobotC1001Component::DFRobotC1001Component(uart::UARTComponent *parent) : uart::UARTDevice(parent), hu(&Serial1) {}
+DFRobotC1001::DFRobotC1001(UARTComponent *parent) : UARTDevice(parent), hu_(parent) {}
 
-void DFRobotC1001Component::setup() {
-  ESP_LOGI(TAG, "Setting up DFRobot C1001 component...");
+void DFRobotC1001::setup() {
+  ESP_LOGCONFIG(TAG, "Setting up DFRobot C1001...");
 
-  Serial1.begin(115200, SERIAL_8N1, 4, 17);  // RX: GPIO4, TX: GPIO17
-
-  // Initialize sensor
-  if (hu.begin() != 0) {
-    ESP_LOGE(TAG, "Failed to initialize the sensor!");
-  } else {
-    ESP_LOGI(TAG, "Sensor initialized successfully.");
+  if (hu_.begin() != 0) {
+    ESP_LOGE(TAG, "Initialization failed!");
+    return;
   }
+  ESP_LOGCONFIG(TAG, "Initialization successful.");
 
-  // Set initial settings
-  this->set_led_enabled(led_enabled_);
-  this->set_fall_sensitivity(fall_sensitivity_);
-  this->set_installation_height(installation_height_);
+  // Default configuration
+  hu_.configWorkMode(hu_.eFallingMode);
+  hu_.configLEDLight(hu_.eFALLLed, 1);
+  hu_.dmInstallHeight(270);
+  hu_.dmFallTime(5);
+  hu_.dmFallConfig(hu_.eResidenceTime, 200);
+  hu_.dmFallConfig(hu_.eFallSensitivityC, 3);
+  hu_.sensorRet();  // Apply settings
 }
 
-void DFRobotC1001Component::loop() {
-  // Add any continuous monitoring or periodic checks here if necessary
+void DFRobotC1001::loop() {
+  // Poll sensor data every loop and log it
+  uint16_t presence = get_human_presence();
+  uint8_t heart_rate = get_heart_rate();
+  uint8_t breathe_state = get_breathe_state();
+
+  // Log sensor data (or publish to Home Assistant entities)
+  ESP_LOGD(TAG, "Presence: %d, Heart Rate: %d, Breathe State: %d", presence, heart_rate, breathe_state);
 }
 
-void DFRobotC1001Component::dump_config() {
-    ESP_LOGCONFIG(TAG, "DFRobot C1001 Configuration");
+void DFRobotC1001::dump_config() {
+  ESP_LOGCONFIG(TAG, "DFRobot C1001:");
+  ESP_LOGCONFIG(TAG, "  Work mode: %d", get_work_mode());
 }
 
-void DFRobotC1001Component::set_led_enabled(bool enabled) {
-  led_enabled_ = enabled;
-  hu.configLEDLight(hu.eHPLed, enabled ? 1 : 0);
-  hu.configLEDLight(hu.eFALLLed, enabled ? 1 : 0);
+void DFRobotC1001::set_work_mode(DFRobot_HumanDetection::eWorkMode mode) {
+  hu_.configWorkMode(mode);
 }
 
-void DFRobotC1001Component::set_fall_sensitivity(int sensitivity) {
-  fall_sensitivity_ = sensitivity;
-  hu.dmFallConfig(hu.eFallSensitivityC, sensitivity);
+void DFRobotC1001::set_led_state(DFRobot_HumanDetection::eLed led, uint8_t state) {
+  hu_.configLEDLight(led, state);
 }
 
-void DFRobotC1001Component::set_installation_height(int height_cm) {
-  installation_height_ = height_cm;
-  hu.dmInstallHeight(height_cm);
+void DFRobotC1001::set_installation_height(uint16_t height) {
+  hu_.dmInstallHeight(height);
 }
 
-int DFRobotC1001Component::get_presence_status() {
-  return hu.smHumanData(hu.eHumanPresence);
+void DFRobotC1001::set_fall_sensitivity(uint8_t sensitivity) {
+  hu_.dmFallConfig(hu_.eFallSensitivityC, sensitivity);
 }
 
-int DFRobotC1001Component::get_motion_status() {
-  return hu.smHumanData(hu.eHumanMovement);
+void DFRobotC1001::set_fall_time(uint16_t time) {
+  hu_.dmFallTime(time);
 }
 
-int DFRobotC1001Component::get_fall_status() {
-  return hu.getFallData(hu.eFallState);
+// Data retrieval methods
+uint8_t DFRobotC1001::get_work_mode() {
+  return hu_.getWorkMode();
 }
 
-int DFRobotC1001Component::get_residency_status() {
-  return hu.getFallData(hu.estaticResidencyState);
+uint8_t DFRobotC1001::get_led_state(DFRobot_HumanDetection::eLed led) {
+  return hu_.getLEDLightState(led);
+}
+
+uint16_t DFRobotC1001::get_human_presence() {
+  return hu_.smHumanData(hu_.eHumanPresence);
+}
+
+uint8_t DFRobotC1001::get_heart_rate() {
+  return hu_.getHeartRate();
+}
+
+uint8_t DFRobotC1001::get_breathe_state() {
+  return hu_.getBreatheState();
+}
+
+sSleepComposite DFRobotC1001::get_sleep_composite() {
+  return hu_.getSleepComposite();
+}
+
+sSleepStatistics DFRobotC1001::get_sleep_statistics() {
+  return hu_.getSleepStatistics();
 }
 
 }  // namespace dfrobot_c1001
