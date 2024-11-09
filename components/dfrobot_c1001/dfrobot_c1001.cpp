@@ -33,35 +33,35 @@ void dfrobot_c1001::dump_config(){
 }
 
 void DFRobotC1001Component::set_led_enabled(bool enabled) {
-  led_enabled_ = enabled;
-  hu.configLEDLight(hu.eHPLed, enabled ? 1 : 0);
-  hu.configLEDLight(hu.eFALLLed, enabled ? 1 : 0);
+    led_enabled_ = enabled;
+    hu.configLEDLight(hu.eHPLed, enabled ? 1 : 0);
+    hu.configLEDLight(hu.eFALLLed, enabled ? 1 : 0);
 }
 
 void DFRobotC1001Component::set_fall_sensitivity(int sensitivity) {
-  fall_sensitivity_ = sensitivity;
-  hu.dmFallConfig(hu.eFallSensitivityC, sensitivity);
+    fall_sensitivity_ = sensitivity;
+    hu.dmFallConfig(hu.eFallSensitivityC, sensitivity);
 }
 
 void DFRobotC1001Component::set_installation_height(int height_cm) {
-  installation_height_ = height_cm;
-  hu.dmInstallHeight(height_cm);
+    installation_height_ = height_cm;
+    hu.dmInstallHeight(height_cm);
 }
 
 int DFRobotC1001Component::get_presence_status() {
-  return hu.smHumanData(hu.eHumanPresence);
+    return hu.smHumanData(hu.eHumanPresence);
 }
 
 int DFRobotC1001Component::get_motion_status() {
-  return hu.smHumanData(hu.eHumanMovement);
+    return hu.smHumanData(hu.eHumanMovement);
 }
 
 int DFRobotC1001Component::get_fall_status() {
-  return hu.getFallData(hu.eFallState);
+    return hu.getFallData(hu.eFallState);
 }
 
 int DFRobotC1001Component::get_residency_status() {
-  return hu.getFallData(hu.estaticResidencyState);
+    return hu.getFallData(hu.estaticResidencyState);
 }
 
 

@@ -10,7 +10,7 @@ namespace dfrobot_c1001 {
 class dfrobot_c1001 : public uart::UARTDevice, public Component {
  public:
     // Constructor, initializes UART device with the parent component
-    dfrobot_c1001(UARTComponent *parent) : uart::UARTDevice(parent), hu(&Serial1) {}
+    DFRobotC1001Component(uart::UARTComponent *parent) : uart::UARTDevice(parent), hu(&Serial1) {}
 
     // Standard ESPHome methods
     void setup() override;
