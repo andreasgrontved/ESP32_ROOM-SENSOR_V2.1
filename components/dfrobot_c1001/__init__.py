@@ -2,11 +2,11 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
 from esphome.automation import maybe_simple_id
-from esphome.components import uart, switch
-from esphome.const import (
-    CONF_ID, CONF_HEIGHT, CONF_FALL_TIME, CONF_SENSITIVITY, CONF_FACTORY_RESET, 
-    ENTITY_CATEGORY_CONFIG, DEVICE_CLASS_MOTION
-)
+from esphome.const import CONF_FACTORY_RESET, CONF_ID, CONF_SENSITIVITY, CONF_HEIGHT  # Remove CONF_FALL_TIME if needed
+from esphome.components import uart
+
+# Define CONF_FALL_TIME locally if it’s missing from esphome.const
+CONF_FALL_TIME = "fall_time"
 
 CODEOWNERS = ["@andreasgrontved"]
 DEPENDENCIES = ["uart"]
@@ -19,22 +19,7 @@ DFRobotC1001Component = dfrobot_c1001_ns.class_("DFRobotC1001Component", cg.Comp
 DFRobotC1001ResetAction = dfrobot_c1001_ns.class_("DFRobotC1001ResetAction", automation.Action)
 DFRobotC1001SettingsAction = dfrobot_c1001_ns.class_("DFRobotC1001SettingsAction", automation.Action)
 
-# Switches
-DFRobotC1001Switch = dfrobot_c1001_ns.class_(
-    "DFRobotC1001Switch", switch.Switch, cg.Component, cg.Parented.template(DFRobotC1001Component)
-)
-PowerSwitch = dfrobot_c1001_ns.class_("PowerSwitch", DFRobotC1001Switch)
-LedSwitch = dfrobot_c1001_ns.class_("LedSwitch", DFRobotC1001Switch)
-UartPresenceSwitch = dfrobot_c1001_ns.class_("UartPresenceSwitch", DFRobotC1001Switch)
-StartAfterBootSwitch = dfrobot_c1001_ns.class_("StartAfterBootSwitch", DFRobotC1001Switch)
-
 CONF_DFROBOT_C1001_ID = "dfrobot_c1001_id"
-SWITCH_TYPES = {
-    "power": PowerSwitch,
-    "led": LedSwitch,
-    "uart_presence": UartPresenceSwitch,
-    "start_after_boot": StartAfterBootSwitch,
-}
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -59,7 +44,6 @@ async def to_code(config):
     if config.get(CONF_FACTORY_RESET):
         cg.add(var.factory_reset())
 
-# Register actions
 @automation.register_action(
     "dfrobot_c1001.reset",
     DFRobotC1001ResetAction,
@@ -108,35 +92,3 @@ async def dfrobot_c1001_settings_to_code(config, action_id, template_arg, args):
         cg.add(var.set_sensitivity(template_))
 
     return var
-
-# Define switches
-_SWITCH_SCHEMA = switch.switch_schema(
-    entity_category=ENTITY_CATEGORY_CONFIG,
-).extend(
-    {
-        cv.GenerateID(CONF_DFROBOT_C1001_ID): cv.use_id(DFRobotC1001Component),
-    }
-).extend(cv.COMPONENT_SCHEMA)
-
-CONFIG_SCHEMA_SWITCH = cv.typed_schema(
-    {
-        "power": _SWITCH_SCHEMA.extend(
-            {cv.GenerateID(): cv.declare_id(PowerSwitch)}
-        ),
-        "led": _SWITCH_SCHEMA.extend(
-            {cv.GenerateID(): cv.declare_id(LedSwitch)}
-        ),
-        "uart_presence": _SWITCH_SCHEMA.extend(
-            {cv.GenerateID(): cv.declare_id(UartPresenceSwitch)}
-        ),
-        "start_after_boot": _SWITCH_SCHEMA.extend(
-            {cv.GenerateID(): cv.declare_id(StartAfterBootSwitch)}
-        ),
-    }
-)
-
-async def setup_switches(config, switch_type, parent):
-    var = await switch.new_switch(config)
-    await cg.register_component(var, config)
-    await cg.register_parented(var, parent)
-    cg.add(getattr(parent, f"set_{switch_type}_switch")(var))
