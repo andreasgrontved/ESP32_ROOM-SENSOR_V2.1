@@ -1,92 +1,43 @@
 #pragma once
 
 #include "esphome/components/uart/uart.h"
-#include "esphome/core/automation.h"
 #include "esphome/core/component.h"
-#include "DFRobot_HumanDetection.h"  // DFRobot library
-
-#ifdef USE_BINARY_SENSOR
-#include "esphome/components/binary_sensor/binary_sensor.h"
-#endif
-#ifdef USE_SWITCH
-#include "esphome/components/switch/switch.h"
-#endif
+#include <memory>
+#include <string>
+#include <queue>
 
 namespace esphome {
 namespace dfrobot_c1001 {
 
-const uint8_t MMWAVE_READ_BUFFER_LENGTH = 255;
+class Command;  // Forward declaration for Command
 
 class DFRobotC1001Component : public uart::UARTDevice, public Component {
-#ifdef USE_SWITCH
-  SUB_SWITCH(sensor_active)
-  SUB_SWITCH(turn_on_led)
-  SUB_SWITCH(fall_detection)
-#endif
-
  public:
-  void dump_config() override;
+  void setup() override;
   void loop() override;
-  void set_active(bool active) {
-    if (active != active_) {
-#ifdef USE_SWITCH
-      if (this->sensor_active_switch_ != nullptr)
-        this->sensor_active_switch_->publish_state(active);
-#endif
-      active_ = active;
-    }
-  }
-  bool is_active() { return active_; }
 
-  void set_led_active(bool active) {
-    if (led_active_ != active) {
-#ifdef USE_SWITCH
-      if (this->turn_on_led_switch_ != nullptr)
-        this->turn_on_led_switch_->publish_state(active);
-#endif
-      led_active_ = active;
-    }
-  }
-  bool is_led_active() { return led_active_; }
+  void set_installation_height(uint16_t height);
+  void set_sensitivity(uint8_t sensitivity);
+  void set_fall_time(uint16_t time);
+  void factory_reset();
 
-  void set_fall_detection(bool enabled) {
-#ifdef USE_SWITCH
-    if (this->fall_detection_switch_ != nullptr)
-      this->fall_detection_switch_->publish_state(enabled);
-#endif
-    fall_detection_enabled_ = enabled;
-  }
-  bool is_fall_detection_enabled() { return fall_detection_enabled_; }
-
-  void set_installation_height(uint16_t height) { installation_height_ = height; }
-  uint16_t get_installation_height() { return installation_height_; }
-
-  void set_fall_sensitivity(uint8_t sensitivity) { fall_sensitivity_ = sensitivity; }
-  uint8_t get_fall_sensitivity() { return fall_sensitivity_; }
-
-#ifdef USE_BINARY_SENSOR
-  void set_presence_binary_sensor(binary_sensor::BinarySensor *presence_binary_sensor) {
-    presence_binary_sensor_ = presence_binary_sensor;
-  }
-#endif
+  uint8_t read_message_();  // New method to handle reading messages
+  bool send_cmd_(const char *cmd, uint32_t duration);  // New method to send commands
+  void set_presence_(bool presence);  // New method for setting presence
 
  protected:
-#ifdef USE_BINARY_SENSOR
-  binary_sensor::BinarySensor *presence_binary_sensor_{nullptr};
-#endif
+  uint32_t ts_last_cmd_sent_{0};  // Command timing variable
+  char read_buffer_[255];  // Buffer to store messages
 
-  bool active_{false};
-  bool led_active_{false};
-  bool fall_detection_enabled_{false};
-  uint16_t installation_height_{270};  // Default height in cm
-  uint8_t fall_sensitivity_{3};        // Default fall sensitivity (0-3)
-  char read_buffer_[MMWAVE_READ_BUFFER_LENGTH];
-  size_t read_pos_{0};
+  // Queue for handling commands in a circular buffer style
+  std::queue<std::unique_ptr<Command>> command_queue_;
+};
 
-  void process_data_();
-  void set_presence_(bool presence);
-
-  DFRobot_HumanDetection hu_;  // Sensor instance
+// Define a basic Command class for handling individual commands
+class Command {
+ public:
+  virtual ~Command() = default;
+  virtual uint8_t execute(DFRobotC1001Component *parent) = 0;  // Execute command logic
 };
 
 }  // namespace dfrobot_c1001
