@@ -1,53 +1,77 @@
-#include "dfrobot_c1001.h"
-#include "commands.h"
 #include "esphome/core/log.h"
+#include "dfrobot_c1001.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
 
 static const char *TAG = "dfrobot_c1001";
 
-void DFRobotC1001Component::setup() {
-  // Setup component here
-}
+DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent) : UARTDevice(parent), hu_(&parent->stream()) {}
 
-void DFRobotC1001Component::loop() {
-  if (!command_queue_.empty()) {
-    process_command_();  // Process the next command
+
+void dfrobot_c1001::setup() {
+ // Initialize the sensor
+  ESP_LOGI(TAG, "Initializing sensor");
+  while (hu_.begin() != 0) {
+    ESP_LOGE(TAG, "Sensor initialization failed, retrying...");
+    delay(1000);
   }
-}
+  ESP_LOGI(TAG, "Sensor initialized successfully");
 
-void DFRobotC1001Component::set_installation_height(uint16_t height) {
-  ESP_LOGI(TAG, "Setting height to %d", height);
-  // Set height logic here
-}
-
-void DFRobotC1001Component::set_sensitivity(uint8_t sensitivity) {
-  ESP_LOGI(TAG, "Setting sensitivity to %d", sensitivity);
-  // Set sensitivity logic here
-}
-
-void DFRobotC1001Component::set_fall_time(uint16_t time) {
-  ESP_LOGI(TAG, "Setting fall time to %d", time);
-  // Set fall time logic here
-}
-
-void DFRobotC1001Component::factory_reset() {
-  ESP_LOGI(TAG, "Performing factory reset");
-  // Factory reset logic here
-}
-
-void DFRobotC1001Component::enqueue_command(std::unique_ptr<Command> cmd) {
-  command_queue_.push(std::move(cmd));
-}
-
-void DFRobotC1001Component::process_command_() {
-  if (!command_queue_.empty()) {
-    auto &cmd = command_queue_.front();
-    if (cmd->execute(this)) {
-      command_queue_.pop();  // Remove command after execution
-    }
+  // Configure the sensor
+  ESP_LOGI(TAG, "Configuring work mode to Sleep Mode");
+  while (hu_.configWorkMode(hu_.eSleepMode) != 0) {
+    ESP_LOGE(TAG, "Error setting work mode, retrying...");
+    delay(1000);
   }
+  ESP_LOGI(TAG, "Work mode configured successfully");
+
+  // Configure LED light
+  hu_.configLEDLight(hu_.eHPLed, 1);
+
+  // Reset the sensor after configuration
+  hu_.sensorRet();
+}
+
+void dfrobot_c1001::loop() {
+  // Read and publish presence information
+  int presence = hu_.smHumanData(hu_.eHumanPresence);
+  if (presence_sensor != nullptr) {
+    presence_sensor->publish_state(presence);
+  }
+
+  // Read and publish motion information
+  int motion = hu_.smHumanData(hu_.eHumanMovement);
+  if (motion_sensor != nullptr) {
+    motion_sensor->publish_state(motion);
+  }
+
+  // Read and publish body movement parameters
+  int movement_param = hu_.smHumanData(hu_.eHumanMovingRange);
+  if (movement_param_sensor != nullptr) {
+    movement_param_sensor->publish_state(movement_param);
+  }
+
+  // Read and publish respiration rate
+  int respiration_rate = hu_.getBreatheValue();
+  if (respiration_rate_sensor != nullptr) {
+    respiration_rate_sensor->publish_state(respiration_rate);
+  }
+
+  // Read and publish heart rate
+  int heart_rate = hu_.getHeartRate();
+  if (heart_rate_sensor != nullptr) {
+    heart_rate_sensor->publish_state(heart_rate);
+  }
+
+  // Log the data
+  ESP_LOGD(TAG, "Presence: %d, Motion: %d, Movement Param: %d, Respiration Rate: %d, Heart Rate: %d",
+           presence, motion, movement_param, respiration_rate, heart_rate);
+}
+
+void dfrobot_c1001::dump_config(){
+    ESP_LOGCONFIG(TAG, "dfrobot_c1001");
+    LOG_UART_DEVICE(this);
 }
 
 }  // namespace dfrobot_c1001
