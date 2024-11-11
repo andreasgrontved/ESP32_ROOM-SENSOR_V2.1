@@ -7,49 +7,56 @@ namespace dfrobot_c1001 {
 static const char *TAG = "dfrobot_c1001";
 
 DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent)
-    : UARTDevice(parent), hu_(this->get_stream()) {}
+    : UARTDevice(parent), hu_(this->get_stream()) {
+  // Initialize sensors
+  this->presence_binary_sensor = new esphome::binary_sensor::BinarySensor();
+  this->motion_sensor = new esphome::sensor::Sensor();
+  this->movement_param_sensor = new esphome::sensor::Sensor();
+  this->respiration_rate_sensor = new esphome::sensor::Sensor();
+  this->heart_rate_sensor = new esphome::sensor::Sensor();
+}
 
 void DFRobotC1001::setup() {
   ESP_LOGI(TAG, "Initializing sensor");
-  while (hu_.begin() != 0) {
+  while (this->hu_.begin() != 0) {
     ESP_LOGE(TAG, "Sensor initialization failed, retrying...");
     delay(1000);
   }
   ESP_LOGI(TAG, "Sensor initialized successfully");
 
   ESP_LOGI(TAG, "Configuring work mode to Sleep Mode");
-  while (hu_.configWorkMode(hu_.eSleepMode) != 0) {
+  while (this->hu_.configWorkMode(this->hu_.eSleepMode) != 0) {
     ESP_LOGE(TAG, "Error setting work mode, retrying...");
     delay(1000);
   }
   ESP_LOGI(TAG, "Work mode configured successfully");
 
-  hu_.configLEDLight(hu_.eHPLed, 1);
-  hu_.sensorRet();
+  this->hu_.configLEDLight(this->hu_.eHPLed, 1);
+  this->hu_.sensorRet();
 }
 
 void DFRobotC1001::loop() {
-  int presence = hu_.smHumanData(hu_.eHumanPresence);
+  int presence = this->hu_.smHumanData(this->hu_.eHumanPresence);
   if (this->presence_binary_sensor != nullptr) {
     this->presence_binary_sensor->publish_state(presence == 1);
   }
 
-  int motion = hu_.smHumanData(hu_.eHumanMovement);
+  int motion = this->hu_.smHumanData(this->hu_.eHumanMovement);
   if (this->motion_sensor != nullptr) {
     this->motion_sensor->publish_state(motion);
   }
 
-  int movement_param = hu_.smHumanData(hu_.eHumanMovingRange);
+  int movement_param = this->hu_.smHumanData(this->hu_.eHumanMovingRange);
   if (this->movement_param_sensor != nullptr) {
     this->movement_param_sensor->publish_state(movement_param);
   }
 
-  int respiration_rate = hu_.getBreatheValue();
+  int respiration_rate = this->hu_.getBreatheValue();
   if (this->respiration_rate_sensor != nullptr) {
     this->respiration_rate_sensor->publish_state(respiration_rate);
   }
 
-  int heart_rate = hu_.getHeartRate();
+  int heart_rate = this->hu_.getHeartRate();
   if (this->heart_rate_sensor != nullptr) {
     this->heart_rate_sensor->publish_state(heart_rate);
   }
