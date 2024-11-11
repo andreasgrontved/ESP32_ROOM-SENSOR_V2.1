@@ -6,11 +6,11 @@ namespace dfrobot_c1001 {
 
 static const char *TAG = "dfrobot_c1001";
 
-DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent) : UARTDevice(parent), hu_(&parent->stream()) {}
+DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent)
+    : UARTDevice(parent), hu_(this->get_stream()) {}
 
-
-void dfrobot_c1001::setup() {
- // Initialize the sensor
+void DFRobotC1001::setup() {
+  // Initialize the sensor
   ESP_LOGI(TAG, "Initializing sensor");
   while (hu_.begin() != 0) {
     ESP_LOGE(TAG, "Sensor initialization failed, retrying...");
@@ -33,11 +33,11 @@ void dfrobot_c1001::setup() {
   hu_.sensorRet();
 }
 
-void dfrobot_c1001::loop() {
+void DFRobotC1001::loop() {
   // Read and publish presence information
   int presence = hu_.smHumanData(hu_.eHumanPresence);
-  if (presence_sensor != nullptr) {
-    presence_sensor->publish_state(presence);
+  if (presence_binary_sensor != nullptr) {
+    presence_binary_sensor->publish_state(presence == 1);
   }
 
   // Read and publish motion information
@@ -69,9 +69,9 @@ void dfrobot_c1001::loop() {
            presence, motion, movement_param, respiration_rate, heart_rate);
 }
 
-void dfrobot_c1001::dump_config(){
-    ESP_LOGCONFIG(TAG, "dfrobot_c1001");
-    LOG_UART_DEVICE(this);
+void DFRobotC1001::dump_config() {
+  ESP_LOGCONFIG(TAG, "DFRobot C1001 Sensor");
+  LOG_UART_DEVICE(this);
 }
 
 }  // namespace dfrobot_c1001
