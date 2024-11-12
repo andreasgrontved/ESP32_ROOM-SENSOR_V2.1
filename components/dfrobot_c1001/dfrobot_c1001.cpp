@@ -125,7 +125,8 @@ uint8_t DFRobotC1001::begin(void) {
   return 1;
 }
 
-// ... Include all other methods similarly, making sure to use 'this->' where necessary ...
+// Include the rest of the methods from your original DFRobot_HumanDetection.cpp file
+// Make sure to prefix them with 'DFRobotC1001::' and use 'this->' where appropriate
 
 }  // namespace dfrobot_c1001
 }  // namespace esphome
