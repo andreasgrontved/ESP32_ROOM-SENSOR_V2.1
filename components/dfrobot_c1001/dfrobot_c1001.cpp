@@ -7,6 +7,7 @@ DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent) : UARTDevice(parent) {
   this->stream_ = this->get_stream();
 }
 
+
 void DFRobotC1001::setup() {
   ESP_LOGI(TAG, "Initializing DFRobot C1001 sensor...");
 
@@ -125,8 +126,9 @@ uint8_t DFRobotC1001::begin(void) {
   return 1;
 }
 
-// Include the rest of the methods from your original DFRobot_HumanDetection.cpp file
+// Include all other methods from your original DFRobot_HumanDetection.cpp file
 // Make sure to prefix them with 'DFRobotC1001::' and use 'this->' where appropriate
+// Ensure there are no references to 'hu_'
 
 }  // namespace dfrobot_c1001
 }  // namespace esphome

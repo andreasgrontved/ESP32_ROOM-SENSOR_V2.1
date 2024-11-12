@@ -70,3 +70,39 @@ class DFRobotC1001 : public uart::UARTDevice, public Component {
     eHumanMovingRange, ///< Movement distance, range 0~100
     eHumanDistance,
   } esmHuman;
+
+  // Constructor
+  DFRobotC1001(uart::UARTComponent *parent);
+
+  // Overrides
+  void setup() override;
+  void loop() override;
+  void dump_config() override;
+
+protected:
+  const char *name_;
+  binary_sensor::BinarySensor *presence_binary_sensor_{nullptr};
+  sensor::Sensor *motion_sensor_{nullptr};
+  sensor::Sensor *movement_param_sensor_{nullptr};
+  sensor::Sensor *respiration_rate_sensor_{nullptr};
+  sensor::Sensor *heart_rate_sensor_{nullptr};
+
+
+  // Sensor communication methods
+  uint8_t begin(void);
+  uint8_t configWorkMode(eWorkMode mode);
+  uint8_t getWorkMode(void);
+  uint16_t smHumanData(esmHuman hm);
+  uint8_t getBreatheValue(void);
+  uint8_t getHeartRate(void);
+
+  // Private methods
+  uint8_t getData(uint8_t con, uint8_t cmd, uint16_t len, uint8_t *senData, uint8_t *retData);
+  uint8_t sumData(uint8_t len, uint8_t *buf);
+
+  // Stream for communication
+  Stream *stream_;
+};
+
+}  // namespace dfrobot_c1001
+}  // namespace esphome
