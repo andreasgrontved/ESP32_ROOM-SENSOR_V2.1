@@ -1,72 +1,102 @@
 #include "esphome/core/log.h"
 #include "dfrobot_c1001.h"
+#include "DFRobot_HumanDetection.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
 
-static const char *TAG = "dfrobot_c1001";
+static const char *TAG = "dfrobot_c1001.component";
 
-DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent)
-    : UARTDevice(parent), hu_(this->get_stream()) {}
+dfrobot_c1001::dfrobot_c1001(uart::UARTComponent *parent)
+    : UARTDevice(parent), hu_(this->get_stream()) {
 
-void DFRobotC1001::setup() {
-  ESP_LOGI(TAG, "Initializing sensor");
-  while (this->hu_.begin() != 0) {
-    ESP_LOGE(TAG, "Sensor initialization failed, retrying...");
+DFRobot_HumanDetection hu(&Serial1);
+
+void dfrobot_c1001::setup() {  
+  ESP_LOGCONFIG(TAG, "Start initialization");
+  while (hu.begin() != 0) {
+    ESP_LOGCONFIG(TAG, "init error!!!");
     delay(1000);
   }
-  ESP_LOGI(TAG, "Sensor initialized successfully");
+  ESP_LOGCONFIG(TAG,"Initialization successful");
 
-  ESP_LOGI(TAG, "Configuring work mode to Sleep Mode");
-  while (this->hu_.configWorkMode(this->hu_.eSleepMode) != 0) {
-    ESP_LOGE(TAG, "Error setting work mode, retrying...");
+  ESP_LOGCONFIG(TAG,"Start switching work mode");
+  while (hu.configWorkMode(hu.eSleepMode) != 0) {
+    ESP_LOGCONFIG(TAG,"error!!!");
     delay(1000);
   }
-  ESP_LOGI(TAG, "Work mode configured successfully");
+  ESP_LOGCONFIG(TAG,"Work mode switch successful");
 
-  this->hu_.configLEDLight(this->hu_.eHPLed, 1);
-  this->hu_.sensorRet();
+  ESP_LOGCONFIG(TAG,"Current work mode:");
+  switch (hu.getWorkMode()) {
+    case 1:
+      ESP_LOGCONFIG(TAG,"Fall detection mode");
+      break;
+    case 2:
+      ESP_LOGCONFIG(TAG,"Sleep detection mode");
+      break;
+    default:
+      ESP_LOGCONFIG(TAG,"Read error");
+  }
+
+  hu.configLEDLight(hu.eHPLed, 1);  // Set HP LED switch, it will not light up even if the sensor detects a person when set to 0.
+  hu.sensorRet();                   // Module reset, must perform sensorRet after setting data, otherwise the sensor may not be usable
+
+  ESP_LOGCONFIG(TAG,"HP LED status:");
+  switch (hu.getLEDLightState(hu.eHPLed)) {
+    case 0:
+      ESP_LOGCONFIG(TAG,"Off");
+      break;
+    case 1:
+      ESP_LOGCONFIG(TAG,"On");
+      break;
+    default:
+      ESP_LOGCONFIG(TAG,"Read error");
+  }
+
 }
 
-void DFRobotC1001::loop() {
-  // Read and publish presence information
-  int presence = this->hu_.smHumanData(this->hu_.eHumanPresence);
-  if (this->presence_binary_sensor != nullptr) {
-    this->presence_binary_sensor->publish_state(presence == 1);
+void dfrobot_c1001::loop() {
+Serial.print("Existing information:");
+  switch (hu.smHumanData(hu.eHumanPresence)) {
+    case 0:
+      Serial.println("No one is present");
+      break;
+    case 1:
+      Serial.println("Someone is present");
+      break;
+    default:
+      Serial.println("Read error");
   }
 
-  // Read and publish motion information
-  int motion = this->hu_.smHumanData(this->hu_.eHumanMovement);
-  if (this->motion_sensor != nullptr) {
-    this->motion_sensor->publish_state(motion);
+  Serial.print("Motion information:");
+  switch (hu.smHumanData(hu.eHumanMovement)) {
+    case 0:
+      ESP_LOGCONFIG(TAG,"None");
+      break;
+    case 1:
+      ESP_LOGCONFIG(TAG,"Still");
+      break;
+    case 2:
+      ESP_LOGCONFIG(TAG,"Active");
+      break;
+    default:
+      ESP_LOGCONFIG(TAG,"Read error");
   }
 
-  // Read and publish body movement parameters
-  int movement_param = this->hu_.smHumanData(this->hu_.eHumanMovingRange);
-  if (this->movement_param_sensor != nullptr) {
-    this->movement_param_sensor->publish_state(movement_param);
-  }
-
-  // Read and publish respiration rate
-  int respiration_rate = this->hu_.getBreatheValue();
-  if (this->respiration_rate_sensor != nullptr) {
-    this->respiration_rate_sensor->publish_state(respiration_rate);
-  }
-
-  // Read and publish heart rate
-  int heart_rate = this->hu_.getHeartRate();
-  if (this->heart_rate_sensor != nullptr) {
-    this->heart_rate_sensor->publish_state(heart_rate);
-  }
-
-  // Log the data
-  ESP_LOGD(TAG, "Presence: %d, Motion: %d, Movement Param: %d, Respiration Rate: %d, Heart Rate: %d",
-           presence, motion, movement_param, respiration_rate, heart_rate);
+  ESP_LOGCONFIG(TAG,"Body movement parameters: ");
+  ESP_LOGCONFIG(TAG,hu.smHumanData(hu.eHumanMovingRange));
+  ESP_LOGCONFIG(TAG,"Respiration rate: ");
+  ESP_LOGCONFIG(TAG,hu.getBreatheValue());
+  ESP_LOGCONFIG(TAG,"Heart rate: ");
+  ESP_LOGCONFIG(TAG,hu.getHeartRate());
+  ESP_LOGCONFIG(TAG,"-----------------------");
+  delay(1000);
+}
 }
 
-void DFRobotC1001::dump_config() {
-  ESP_LOGCONFIG(TAG, "DFRobot C1001 Sensor");
-  LOG_UART_DEVICE(this);
+void dfrobot_c1001::dump_config(){
+    ESP_LOGCONFIG(TAG, "dfrobot_c1001");
 }
 
 }  // namespace dfrobot_c1001
