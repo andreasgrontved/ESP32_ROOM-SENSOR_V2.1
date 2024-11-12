@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esphome/core/component.h"
+#include "esphome/core/log.h"
 #include "esphome/components/uart/uart.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
@@ -8,7 +9,7 @@
 namespace esphome {
 namespace dfrobot_c1001 {
 
-static const char *TAG = "dfrobot_c1001.component";
+static const char *const TAG = "dfrobot_c1001.component";
 
 #define TIME_OUT 5000  // 5 seconds
 
