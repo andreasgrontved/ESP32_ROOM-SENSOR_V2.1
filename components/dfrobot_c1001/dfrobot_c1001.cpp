@@ -63,40 +63,22 @@ void dfrobot_c1001::setup() {
 }
 
 void dfrobot_c1001::loop() {
-ESP_LOGI(TAG,"Existing information:");
-  switch (hu.smHumanData(hu.eHumanPresence)) {
-    case 0:
-      ESP_LOGI(TAG,"No one is present");
-      break;
-    case 1:
-      ESP_LOGI(TAG,"Someone is present");
-      break;
-    default:
-      ESP_LOGI(TAG,"Read error");
+  if (this->presence_sensor_ != nullptr)
+    this->presence_sensor_->publish_state(hu.smHumanData(hu.eHumanPresence) == 1);
+
+  if (this->movement_sensor_ != nullptr) {
+    int movement = hu.smHumanData(hu.eHumanMovement);
+    this->movement_sensor_->publish_state(movement == 1 ? "Still" : (movement == 2 ? "Active" : "None"));
   }
 
-  ESP_LOGI(TAG,"Motion information:");
-  switch (hu.smHumanData(hu.eHumanMovement)) {
-    case 0:
-      ESP_LOGI(TAG,"None");
-      break;
-    case 1:
-      ESP_LOGI(TAG,"Still");
-      break;
-    case 2:
-      ESP_LOGI(TAG,"Active");
-      break;
-    default:
-      ESP_LOGI(TAG,"Read error");
-  }
+  if (this->movement_param_sensor_ != nullptr)
+    this->movement_param_sensor_->publish_state(hu.smHumanData(hu.eHumanMovingRange));
 
-  ESP_LOGI(TAG,"Body movement parameters: ");
-  ESP_LOGI(TAG,hu.smHumanData(hu.eHumanMovingRange));
-  ESP_LOGI(TAG,"Respiration rate: ");
-  ESP_LOGI(TAG,hu.getBreatheValue());
-  ESP_LOGI(TAG,"Heart rate: ");
-  ESP_LOGI(TAG,hu.getHeartRate());
-  ESP_LOGI(TAG,"-----------------------");
+  if (this->respiration_rate_sensor_ != nullptr)
+    this->respiration_rate_sensor_->publish_state(hu.getBreatheValue());
+
+  if (this->heart_rate_sensor_ != nullptr)
+    this->heart_rate_sensor_->publish_state(hu.getHeartRate());
   delay(1000);
 }
 
