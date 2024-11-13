@@ -3,6 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
 
+
 namespace esphome {
 namespace dfrobot_c1001 {
 

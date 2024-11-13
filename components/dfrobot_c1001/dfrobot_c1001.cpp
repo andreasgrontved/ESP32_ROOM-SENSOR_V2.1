@@ -1,5 +1,6 @@
 #include "esphome/core/log.h"
 #include "dfrobot_c1001.h"
+#include "DFRobot_HumanDetection.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
@@ -8,84 +9,94 @@ static const char *TAG = "dfrobot_c1001.component";
 
 
 void dfrobot_c1001::setup() {
-  ESP_LOGCONFIG(TAG,"Start initialization");
-  while (hu.begin() != 0) {
-    ESP_LOGCONFIG(TAG,"init error!!!");
+  // Retrieve the UART component defined in the ESPHome YAML
+  auto *uart_bus = this->uart_bus_;
+  if (uart_bus == nullptr) {
+    ESP_LOGE(TAG, "UART bus not found! Initialization failed.");
+    return;
+  }
+
+  ESP_LOGI(TAG, "Start initialization");
+
+  // Replace 'hu' with the specific initialization function for your device
+  while (hu.begin(uart_bus) != 0) {  // Example: initialize 'hu' with UART
+    ESP_LOGE(TAG, "Init error!!! Retrying...");
     delay(1000);
   }
-  ESP_LOGCONFIG(TAG,"Initialization successful");
+  
+  ESP_LOGI(TAG, "Initialization successful");
 
-  ESP_LOGCONFIG(TAG,"Start switching work mode");
+  ESP_LOGI(TAG,"Start switching work mode");
   while (hu.configWorkMode(hu.eSleepMode) != 0) {
-    ESP_LOGCONFIG(TAG,"error!!!");
+    ESP_LOGI(TAG,"error!!!");
     delay(1000);
   }
-  ESP_LOGCONFIG(TAG,"Work mode switch successful");
+  ESP_LOGI(TAG,"Work mode switch successful");
 
-  Serial.print("Current work mode:");
+  ESP_LOGI(TAG,"Current work mode:");
   switch (hu.getWorkMode()) {
     case 1:
-      ESP_LOGCONFIG(TAG,"Fall detection mode");
+      ESP_LOGI(TAG,"Fall detection mode");
       break;
     case 2:
-      ESP_LOGCONFIG(TAG,"Sleep detection mode");
+      ESP_LOGI(TAG,"Sleep detection mode");
       break;
     default:
-      ESP_LOGCONFIG(TAG,"Read error");
+      ESP_LOGI(TAG,"Read error");
   }
 
   hu.configLEDLight(hu.eHPLed, 1);  // Set HP LED switch, it will not light up even if the sensor detects a person when set to 0.
   hu.sensorRet();                   // Module reset, must perform sensorRet after setting data, otherwise the sensor may not be usable
 
-  Serial.print("HP LED status:");
+  ESP_LOGI(TAG,"HP LED status:");
   switch (hu.getLEDLightState(hu.eHPLed)) {
     case 0:
-      ESP_LOGCONFIG(TAG,"Off");
+      ESP_LOGI(TAG,"Off");
       break;
     case 1:
-      ESP_LOGCONFIG(TAG,"On");
+      ESP_LOGI(TAG,"On");
       break;
     default:
-      ESP_LOGCONFIG(TAG,"Read error");
+      ESP_LOGI(TAG,"Read error");
   }
 
 }
 
 void dfrobot_c1001::loop() {
-Serial.print("Existing information:");
+ESP_LOGI(TAG,"Existing information:");
   switch (hu.smHumanData(hu.eHumanPresence)) {
     case 0:
-      ESP_LOGCONFIG(TAG,"No one is present");
+      ESP_LOGI(TAG,"No one is present");
       break;
     case 1:
-      ESP_LOGCONFIG(TAG,"Someone is present");
+      ESP_LOGI(TAG,"Someone is present");
       break;
     default:
-      ESP_LOGCONFIG(TAG,"Read error");
+      ESP_LOGI(TAG,"Read error");
   }
 
-  Serial.print("Motion information:");
+  ESP_LOGI(TAG,"Motion information:");
   switch (hu.smHumanData(hu.eHumanMovement)) {
     case 0:
-      ESP_LOGCONFIG(TAG,"None");
+      ESP_LOGI(TAG,"None");
       break;
     case 1:
-      ESP_LOGCONFIG(TAG,"Still");
+      ESP_LOGI(TAG,"Still");
       break;
     case 2:
-      ESP_LOGCONFIG(TAG,"Active");
+      ESP_LOGI(TAG,"Active");
       break;
     default:
-      ESP_LOGCONFIG(TAG,"Read error");
+      ESP_LOGI(TAG,"Read error");
   }
 
-  ESP_LOGCONFIG(TAG,"Body movement parameters: ");
-  ESP_LOGCONFIG(TAG,hu.smHumanData(hu.eHumanMovingRange));
-  ESP_LOGCONFIG(TAG,"Respiration rate: ");
-  ESP_LOGCONFIG(TAG,hu.getBreatheValue());
-  ESP_LOGCONFIG(TAG,"Heart rate: ");
-  ESP_LOGCONFIG(TAG,hu.getHeartRate());
-  ESP_LOGCONFIG(TAG,"-----------------------");
+  ESP_LOGI(TAG,"Body movement parameters: ");
+  ESP_LOGI(TAG,hu.smHumanData(hu.eHumanMovingRange));
+  ESP_LOGI(TAG,"Respiration rate: ");
+  ESP_LOGI(TAG,hu.getBreatheValue());
+  ESP_LOGI(TAG,"Heart rate: ");
+  ESP_LOGI(TAG,hu.getHeartRate());
+  ESP_LOGI(TAG,"-----------------------");
   delay(1000);
 }
 
