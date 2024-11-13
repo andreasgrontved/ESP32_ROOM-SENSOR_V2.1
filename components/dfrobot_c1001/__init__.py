@@ -1,13 +1,14 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart, sensor
-from esphome.const import CONF_ID, CONF_NAME
+from esphome.const import CONF_ID
 
 DEPENDENCIES = ["uart"]
 
 dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
-dfrobot_c1001 = dfrobot_c1001_ns.class_("dfrobot_c1001", cg.Component, uart.UARTDevice)
+DFRobotC1001 = dfrobot_c1001_ns.class_("DFRobotC1001", cg.Component, uart.UARTDevice)
 
+# Define sensor options
 CONF_PRESENCE_SENSOR = "presence_sensor"
 CONF_MOVEMENT_SENSOR = "movement_sensor"
 CONF_MOVEMENT_PARAM_SENSOR = "movement_param_sensor"
@@ -15,7 +16,7 @@ CONF_RESPIRATION_RATE_SENSOR = "respiration_rate_sensor"
 CONF_HEART_RATE_SENSOR = "heart_rate_sensor"
 
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(dfrobot_c1001),
+    cv.GenerateID(): cv.declare_id(DFRobotC1001),
     cv.Optional(CONF_PRESENCE_SENSOR): sensor.sensor_schema(),
     cv.Optional(CONF_MOVEMENT_SENSOR): sensor.sensor_schema(),
     cv.Optional(CONF_MOVEMENT_PARAM_SENSOR): sensor.sensor_schema(),
