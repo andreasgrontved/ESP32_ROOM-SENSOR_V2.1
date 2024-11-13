@@ -8,50 +8,51 @@ namespace dfrobot_c1001 {
 static const char *TAG = "dfrobot_c1001";
 
 void DFRobotC1001::setup() {
-  auto *uart_bus = this->uart_bus_;
-  if (uart_bus == nullptr) {
-    ESP_LOGE(TAG, "UART bus not found! Initialization failed.");
+  if (!this->is_uart_initialised()) {
+    ESP_LOGE(TAG, "UART not initialized! Check your UART settings.");
     return;
   }
 
-  ESP_LOGI(TAG, "Starting initialization");
+  ESP_LOGI(TAG, "Starting DFRobot C1001 sensor initialization");
 
-  while (hu.begin(uart_bus) != 0) {
-    ESP_LOGE(TAG, "Init error! Retrying...");
-    delay(1000);
+  if (hu.begin(this->get_uart()) != 0) {
+    ESP_LOGE(TAG, "Sensor initialization failed! Retrying...");
+    return;
   }
-  
-  ESP_LOGI(TAG, "Initialization successful");
-  hu.configLEDLight(hu.eHPLed, 1);  
+
+  ESP_LOGI(TAG, "DFRobot C1001 initialization successful");
+  hu.configLEDLight(hu.eHPLed, 1);  // Enable LED light as part of setup
   hu.sensorRet();
 }
 
-void DFRobotC1001::update() {
-  if (this->presence_sensor)
-    this->presence_sensor->publish_state(hu.smHumanData(hu.eHumanPresence) == 1);
+void DFRobotC1001::loop() {
+  if (this->presence_sensor_)
+    this->presence_sensor_->publish_state(hu.smHumanData(hu.eHumanPresence) == 1);
 
-  if (this->movement_sensor) {
+  if (this->movement_sensor_) {
     int movement = hu.smHumanData(hu.eHumanMovement);
-    this->movement_sensor->publish_state(movement == 1 ? "Still" : (movement == 2 ? "Active" : "None"));
+    this->movement_sensor_->publish_state(movement == 1 ? "Still" : (movement == 2 ? "Active" : "None"));
   }
 
-  if (this->movement_param_sensor)
-    this->movement_param_sensor->publish_state(hu.smHumanData(hu.eHumanMovingRange));
+  if (this->movement_param_sensor_)
+    this->movement_param_sensor_->publish_state(hu.smHumanData(hu.eHumanMovingRange));
 
-  if (this->respiration_rate_sensor)
-    this->respiration_rate_sensor->publish_state(hu.getBreatheValue());
+  if (this->respiration_rate_sensor_)
+    this->respiration_rate_sensor_->publish_state(hu.getBreatheValue());
 
-  if (this->heart_rate_sensor)
-    this->heart_rate_sensor->publish_state(hu.getHeartRate());
+  if (this->heart_rate_sensor_)
+    this->heart_rate_sensor_->publish_state(hu.getHeartRate());
+
+  delay(1000);
 }
 
 void DFRobotC1001::dump_config() {
-  ESP_LOGCONFIG(TAG, "DFRobot C1001 Sensor");
-  LOG_SENSOR("  ", "Presence Sensor", this->presence_sensor);
-  LOG_SENSOR("  ", "Movement Sensor", this->movement_sensor);
-  LOG_SENSOR("  ", "Movement Parameter", this->movement_param_sensor);
-  LOG_SENSOR("  ", "Respiration Rate", this->respiration_rate_sensor);
-  LOG_SENSOR("  ", "Heart Rate", this->heart_rate_sensor);
+  ESP_LOGCONFIG(TAG, "DFRobot C1001 Sensor:");
+  LOG_SENSOR("  ", "Presence Sensor", this->presence_sensor_);
+  LOG_SENSOR("  ", "Movement Sensor", this->movement_sensor_);
+  LOG_SENSOR("  ", "Movement Parameter Sensor", this->movement_param_sensor_);
+  LOG_SENSOR("  ", "Respiration Rate Sensor", this->respiration_rate_sensor_);
+  LOG_SENSOR("  ", "Heart Rate Sensor", this->heart_rate_sensor_);
 }
 
 }  // namespace dfrobot_c1001
