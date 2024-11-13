@@ -2,15 +2,18 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
-
+#include "esphome/components/sensor/sensor.h"
+#include "DFRobot_HumanDetection.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
 
-class dfrobot_c1001 : public uart::UARTDevice, public Component {
+class DFRobotC1001 : public uart::UARTDevice, public PollingComponent {
  public:
+  DFRobotC1001() : PollingComponent(1000) {}  // Adjust interval as needed
+
   void setup() override;
-  void loop() override;
+  void update() override;  // Replaces loop()
   void dump_config() override;
 
   // Sensor objects for each data point
