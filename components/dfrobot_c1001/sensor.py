@@ -1,12 +1,17 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, uart
-from esphome.const import CONF_ID, UNIT_EMPTY, UNIT_METER, ICON_EMPTY
+from esphome.const import CONF_ID
 
 DEPENDENCIES = ["uart"]
 
 dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
 DFRobotC1001 = dfrobot_c1001_ns.class_("DFRobotC1001", cg.PollingComponent, uart.UARTDevice)
+
+CONFIG_SCHEMA = cv.Schema({}).extend(cv.COMPONENT_SCHEMA)
+
+async def to_code(config):
+    cg.add_global(cg.RawStatement("// Test if this log appears in compilation"))
 
 CONF_PRESENCE = "presence"
 CONF_DISTANCE = "distance"
@@ -35,3 +40,5 @@ async def to_code(config):
     if CONF_DISTANCE in config:
         distance_sensor = await sensor.new_sensor(config[CONF_DISTANCE])
         cg.add(var.set_distance_sensor(distance_sensor))
+
+
