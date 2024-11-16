@@ -1,15 +1,14 @@
-#include "dfrobot_c1001.h"
 #include "esphome/core/log.h"
+#include "dfrobot_c1001.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
 
 static const char *const TAG = "dfrobot_c1001";
 
-void DFRobotC1001Component::setup() {
+void dfrobot_c1001::setup() {
   Serial1.begin(115200, SERIAL_8N1, 17, 16);
   hu = new DFRobot_HumanDetection(&Serial1);
-
   while (hu->begin() != 0) {
     ESP_LOGE(TAG, "Initialization error!!!");
     delay(1000);
@@ -26,7 +25,7 @@ void DFRobotC1001Component::setup() {
   hu->sensorRet();
 }
 
-void DFRobotC1001Component::update() {
+void dfrobot_c1001::loop() {
   int presence = hu->smHumanData(hu->eHumanPresence);
   int movement = hu->smHumanData(hu->eHumanMovement);
   int moving_range = hu->smHumanData(hu->eHumanMovingRange);
@@ -40,7 +39,7 @@ void DFRobotC1001Component::update() {
   heart_rate_sensor->publish_state(heart_rate);
 }
 
-void DFRobotC1001Component::dump_config() {
+void dfrobot_c1001::dump_config(){
   ESP_LOGCONFIG(TAG, "DFRobot C1001:");
   LOG_SENSOR("  ", "Presence", this->presence_sensor);
   LOG_SENSOR("  ", "Movement", this->movement_sensor);
@@ -51,3 +50,5 @@ void DFRobotC1001Component::dump_config() {
 
 }  // namespace dfrobot_c1001
 }  // namespace esphome
+
+
