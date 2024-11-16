@@ -9,7 +9,6 @@ namespace dfrobot_c1001 {
 
 class DFRobotC1001 : public uart::UARTDevice, public Component {
  public:
-  // Constructor accepting a pointer to the UART stream
   explicit DFRobotC1001(Stream *stream);
   void setup() override;
   void loop() override;

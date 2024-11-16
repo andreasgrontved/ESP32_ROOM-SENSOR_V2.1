@@ -6,7 +6,6 @@ namespace dfrobot_c1001 {
 
 static const char *TAG = "dfrobot_c1001";
 
-// Constructor implementation
 DFRobotC1001::DFRobotC1001(Stream *stream) : sensor_(stream) {}
 
 void DFRobotC1001::setup() {
@@ -32,4 +31,11 @@ void DFRobotC1001::process_sensor_data() {
   int presence = this->sensor_.smHumanData(DFRobot_HumanDetection::eHumanPresence);
   int movement = this->sensor_.smHumanData(DFRobot_HumanDetection::eHumanMovement);
 
-  ESP_LOGD(TAG, "Presence: %d, Movement: %d", presence, movem
+  ESP_LOGD(TAG, "Presence: %d, Movement: %d", presence, movement);
+
+  ESP_LOGD(TAG, "Breathe rate: %d", this->sensor_.getBreatheValue());
+  ESP_LOGD(TAG, "Heart rate: %d", this->sensor_.getHeartRate());
+}
+
+}  // namespace dfrobot_c1001
+}  // namespace esphome
