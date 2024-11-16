@@ -2,7 +2,7 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
-#include "DFRobot_HumanDetection.h"  // Include the DFRobot library
+#include "DFRobot_HumanDetection.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
@@ -15,8 +15,8 @@ class DFRobotC1001 : public uart::UARTDevice, public Component {
   void dump_config() override;
 
  private:
-  DFRobot_HumanDetection sensor_;  // Instance of the DFRobot library
-  void process_sensor_data();      // Method to process data from the sensor
+  DFRobot_HumanDetection sensor_;
+  void process_sensor_data();
 };
 
 }  // namespace dfrobot_c1001
