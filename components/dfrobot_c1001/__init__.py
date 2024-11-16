@@ -1,39 +1,24 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import uart, sensor
-from esphome.const import CONF_ID, CONF_PRESENCE, CONF_DISTANCE, UNIT_EMPTY, UNIT_METER
+from esphome import pins
+from esphome.const import CONF_ID
 
-DEPENDENCIES = ["uart"]
+# Define the C++ namespace
+dfrobot_ns = cg.esphome_ns.namespace('dfrobot_c1001')
+DFRobotHumanDetection = dfrobot_ns.class_('DFRobot_HumanDetection', cg.Component)
 
-# Define namespace
-dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
-DFRobotC1001 = dfrobot_c1001_ns.class_(
-    "DFRobotC1001", cg.PollingComponent, uart.UARTDevice
-)
+# Configuration schema
+CONFIG_SCHEMA = cv.Schema({
+    cv.GenerateID(): cv.declare_id(DFRobotHumanDetection),
+    cv.Required("rx_pin"): pins.gpio_input_pin_schema,
+    cv.Required("tx_pin"): pins.gpio_output_pin_schema,
+}).extend(cv.COMPONENT_SCHEMA)
 
-# Define sensor configuration options
-SENSOR_SCHEMA = sensor.sensor_schema(unit_of_measurement=UNIT_EMPTY, accuracy_decimals=0)
-
-CONFIG_SCHEMA = cv.Schema(
-    {
-        cv.GenerateID(): cv.declare_id(DFRobotC1001),
-        cv.Optional(CONF_PRESENCE): SENSOR_SCHEMA,
-        cv.Optional(CONF_DISTANCE): sensor.sensor_schema(
-            unit_of_measurement=UNIT_METER, accuracy_decimals=2
-        ),
-    }
-).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA)
-
+# Code generation logic
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-    await uart.register_uart_device(var, config)
 
-    # Attach sensors
-    if CONF_PRESENCE in config:
-        presence_sensor = await sensor.new_sensor(config[CONF_PRESENCE])
-        cg.add(var.set_presence_sensor(presence_sensor))
-
-    if CONF_DISTANCE in config:
-        distance_sensor = await sensor.new_sensor(config[CONF_DISTANCE])
-        cg.add(var.set_distance_sensor(distance_sensor))
+    rx_pin = await cg.gpio_pin_expression(config["rx_pin"])
+    tx_pin = await cg.gpio_pin_expression(config["tx_pin"])
+    cg.add(var.set_uart_pins(rx_pin, tx_pin))

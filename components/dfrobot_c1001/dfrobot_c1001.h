@@ -1,34 +1,37 @@
 #pragma once
 
-#include "esphome/core/component.h"
-#include "esphome/components/uart/uart.h"
-#include "esphome/components/sensor/sensor.h"
+#include "esphome.h"
 #include "DFRobot_HumanDetection.h"
 
-namespace esphome {
 namespace dfrobot_c1001 {
 
-class DFRobotC1001 : public PollingComponent, public uart::UARTDevice {
+class DFRobot_HumanDetection : public esphome::Component {
  public:
-  // Constructor
-  DFRobotC1001() = default;
+  void set_uart_pins(int rx, int tx) {
+    this->rx_pin = rx;
+    this->tx_pin = tx;
+  }
 
-  // Setup and update methods
-  void setup() override;
-  void update() override;
+  void setup() override {
+    Serial1.begin(115200, SERIAL_8N1, rx_pin, tx_pin);
+    if (sensor.begin() != 0) {
+      ESP_LOGE("DFRobot_HumanDetection", "Initialization failed!");
+    } else {
+      ESP_LOGI("DFRobot_HumanDetection", "Initialization successful");
+    }
+  }
 
-  // Setters for sensors
-  void set_presence_sensor(sensor::Sensor *presence_sensor) { presence_sensor_ = presence_sensor; }
-  void set_distance_sensor(sensor::Sensor *distance_sensor) { distance_sensor_ = distance_sensor; }
+  void loop() override {
+    int presence = sensor.smHumanData(sensor.eHumanPresence);
+    int movement = sensor.smHumanData(sensor.eHumanMovement);
+
+    ESP_LOGD("DFRobot_HumanDetection", "Presence: %d, Movement: %d", presence, movement);
+  }
 
  private:
-  // Pointer to DFRobot's human detection library
-  DFRobot_HumanDetection hu;
-
-  // Sensor pointers for presence and distance
-  sensor::Sensor *presence_sensor_{nullptr};
-  sensor::Sensor *distance_sensor_{nullptr};
+  int rx_pin;
+  int tx_pin;
+  ::DFRobot_HumanDetection sensor{&Serial1};
 };
 
 }  // namespace dfrobot_c1001
-}  // namespace esphome
