@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, uart
-from esphome.const import CONF_ID, UNIT_METER, UNIT_EMPTY, ICON_EMPTY
+from esphome.const import CONF_ID, UNIT_EMPTY, UNIT_METER, ICON_EMPTY
 
 DEPENDENCIES = ["uart"]
 
@@ -22,7 +22,6 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_DISTANCE): SENSOR_SCHEMA,
     }
 ).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA)
-
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
