@@ -1,44 +1,19 @@
 #pragma once
 
-#include "esphome.h"
+#include "esphome/components/sensor/sensor.h"
+#include "esphome/core/component.h"
 #include "DFRobot_HumanDetection.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
 
-class DFRobotC1001 : public PollingComponent {
+class DFRobotC1001Component : public PollingComponent {
  public:
-  DFRobotC1001() : PollingComponent(1000) {}
+  DFRobotC1001Component() : PollingComponent(1000) {}
 
-  void setup() override {
-    Serial1.begin(115200, SERIAL_8N1, 17, 16);
-    hu = new DFRobot_HumanDetection(&Serial1);
-
-    while (hu->begin() != 0) {
-      delay(1000);
-    }
-
-    while (hu->configWorkMode(hu->eSleepMode) != 0) {
-      delay(1000);
-    }
-
-    hu->configLEDLight(hu->eHPLed, 1);
-    hu->sensorRet();
-  }
-
-  void update() override {
-    int presence = hu->smHumanData(hu->eHumanPresence);
-    int movement = hu->smHumanData(hu->eHumanMovement);
-    int moving_range = hu->smHumanData(hu->eHumanMovingRange);
-    int breathe_value = hu->getBreatheValue();
-    int heart_rate = hu->getHeartRate();
-
-    presence_sensor->publish_state(presence);
-    movement_sensor->publish_state(movement);
-    moving_range_sensor->publish_state(moving_range);
-    breathe_value_sensor->publish_state(breathe_value);
-    heart_rate_sensor->publish_state(heart_rate);
-  }
+  void setup() override;
+  void update() override;
+  void dump_config() override;
 
   Sensor *presence_sensor = new Sensor();
   Sensor *movement_sensor = new Sensor();
