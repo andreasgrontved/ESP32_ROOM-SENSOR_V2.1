@@ -1,58 +1,44 @@
-#include "esphome/core/log.h"
 #include "dfrobot_c1001.h"
-#include "DFRobot_HumanDetection.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
 
-static const char *TAG = "dfrobot_c1001";
-
 void DFRobotC1001::setup() {
-  if (!this->is_uart_initialised()) {
-    ESP_LOGE(TAG, "UART not initialized! Check your UART settings.");
-    return;
+  Serial.begin(115200);
+  Serial1.begin(115200, SERIAL_8N1, 17, 16);
+
+  ESP_LOGD("DFRobotC1001", "Start initialization");
+  while (hu.begin() != 0) {
+    ESP_LOGE("DFRobotC1001", "init error!!!");
+    delay(1000);
   }
+  ESP_LOGD("DFRobotC1001", "Initialization successful");
 
-  ESP_LOGI(TAG, "Starting DFRobot C1001 sensor initialization");
-
-  if (hu.begin(this->get_uart()) != 0) {
-    ESP_LOGE(TAG, "Sensor initialization failed! Retrying...");
-    return;
+  ESP_LOGD("DFRobotC1001", "Start switching work mode");
+  while (hu.configWorkMode(hu.eSleepMode) != 0) {
+    ESP_LOGE("DFRobotC1001", "error!!!");
+    delay(1000);
   }
+  ESP_LOGD("DFRobotC1001", "Work mode switch successful");
 
-  ESP_LOGI(TAG, "DFRobot C1001 initialization successful");
-  hu.configLEDLight(hu.eHPLed, 1);  // Enable LED light as part of setup
+  ESP_LOGD("DFRobotC1001", "Current work mode: %d", hu.getWorkMode());
+
+  hu.configLEDLight(hu.eHPLed, 1);
   hu.sensorRet();
+  ESP_LOGD("DFRobotC1001", "HP LED status: %d", hu.getLEDLightState(hu.eHPLed));
 }
 
-void DFRobotC1001::loop() {
-  if (this->presence_sensor_)
-    this->presence_sensor_->publish_state(hu.smHumanData(hu.eHumanPresence) == 1);
-
-  if (this->movement_sensor_) {
-    int movement = hu.smHumanData(hu.eHumanMovement);
-    this->movement_sensor_->publish_state(movement == 1 ? "Still" : (movement == 2 ? "Active" : "None"));
-  }
-
-  if (this->movement_param_sensor_)
-    this->movement_param_sensor_->publish_state(hu.smHumanData(hu.eHumanMovingRange));
-
-  if (this->respiration_rate_sensor_)
-    this->respiration_rate_sensor_->publish_state(hu.getBreatheValue());
-
-  if (this->heart_rate_sensor_)
-    this->heart_rate_sensor_->publish_state(hu.getHeartRate());
-
+void DFRobotC1001::update() {
+  ESP_LOGD("DFRobotC1001", "Existing information: %d", hu.smHumanData(hu.eHumanPresence));
+  ESP_LOGD("DFRobotC1001", "Motion information: %d", hu.smHumanData(hu.eHumanMovement));
+  ESP_LOGD("DFRobotC1001", "Body movement parameters: %d", hu.smHumanData(hu.eHumanMovingRange));
+  ESP_LOGD("DFRobotC1001", "Respiration rate: %d", hu.getBreatheValue());
+  ESP_LOGD("DFRobotC1001", "Heart rate: %d", hu.getHeartRate());
   delay(1000);
 }
 
-void DFRobotC1001::dump_config() {
-  ESP_LOGCONFIG(TAG, "DFRobot C1001 Sensor:");
-  LOG_SENSOR("  ", "Presence Sensor", this->presence_sensor_);
-  LOG_SENSOR("  ", "Movement Sensor", this->movement_sensor_);
-  LOG_SENSOR("  ", "Movement Parameter Sensor", this->movement_param_sensor_);
-  LOG_SENSOR("  ", "Respiration Rate Sensor", this->respiration_rate_sensor_);
-  LOG_SENSOR("  ", "Heart Rate Sensor", this->heart_rate_sensor_);
+void DFRobotC1001::init() {
+  // Additional initialization if necessary
 }
 
 }  // namespace dfrobot_c1001
