@@ -1,5 +1,6 @@
 #pragma once
 
+#include "esphome/components/sensor/sensor.h"
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
 #include "DFRobot_HumanDetection.h"
@@ -7,24 +8,30 @@
 namespace esphome {
 namespace dfrobot_c1001 {
 
-class dfrobot_c1001 : public uart::UARTDevice, public Component {
-  public:
-    dfrobot_c1001() : PollingComponent(1000) {}
+class DFRobotC1001Component : public PollingComponent, public uart::UARTDevice {
+ public:
+  DFRobotC1001Component() : PollingComponent(1000) {}
 
-    void setup() override;
-    void loop() override;
-    void dump_config() override;
+  void setup() override;
+  void update() override;
+  void dump_config() override;
 
-    Sensor *presence_sensor = new Sensor();
-    Sensor *movement_sensor = new Sensor();
-    Sensor *moving_range_sensor = new Sensor();
-    Sensor *breathe_value_sensor = new Sensor();
-    Sensor *heart_rate_sensor = new Sensor();
+  void set_presence_sensor(sensor::Sensor *presence_sensor) { presence_sensor_ = presence_sensor; }
+  void set_movement_sensor(sensor::Sensor *movement_sensor) { movement_sensor_ = movement_sensor; }
+  void set_moving_range_sensor(sensor::Sensor *moving_range_sensor) { moving_range_sensor_ = moving_range_sensor; }
+  void set_breathe_value_sensor(sensor::Sensor *breathe_value_sensor) { breathe_value_sensor_ = breathe_value_sensor; }
+  void set_heart_rate_sensor(sensor::Sensor *heart_rate_sensor) { heart_rate_sensor_ = heart_rate_sensor; }
 
-  private:
-    DFRobot_HumanDetection *hu;
+ protected:
+  sensor::Sensor *presence_sensor_{nullptr};
+  sensor::Sensor *movement_sensor_{nullptr};
+  sensor::Sensor *moving_range_sensor_{nullptr};
+  sensor::Sensor *breathe_value_sensor_{nullptr};
+  sensor::Sensor *heart_rate_sensor_{nullptr};
+
+ private:
+  DFRobot_HumanDetection *hu;
 };
-
 
 }  // namespace dfrobot_c1001
 }  // namespace esphome
