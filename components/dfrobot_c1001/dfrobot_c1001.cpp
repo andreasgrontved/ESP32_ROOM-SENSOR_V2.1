@@ -7,36 +7,29 @@ namespace dfrobot_c1001 {
 static const char *const TAG = "dfrobot_c1001";
 
 void DFRobotC1001Component::setup() {
-  Serial1.begin(115200, SERIAL_8N1, 17, 16);
-  hu = new DFRobot_HumanDetection(&Serial1);
+  ESP_LOGCONFIG(TAG, "Setting up DFRobot C1001...");
+  this->human_detection = new DFRobot_HumanDetection(&Serial1);
 
-  while (hu->begin() != 0) {
-    ESP_LOGE(TAG, "Initialization error!!!");
-    delay(1000);
-  }
-  ESP_LOGI(TAG, "Initialization successful");
-
-  if (height_number_ != nullptr) {
-    hu->dmInstallHeight(static_cast<uint16_t>(height_number_->state));
-  }
-
-  if (work_mode_switch_ != nullptr) {
-    hu->configWorkMode(work_mode_switch_->state ? hu->eSleepMode : hu->eNormalMode);
+  if (this->human_detection->begin() == 0) {
+    ESP_LOGI(TAG, "DFRobot C1001 initialized successfully.");
+  } else {
+    ESP_LOGE(TAG, "Failed to initialize DFRobot C1001.");
   }
 }
 
 void DFRobotC1001Component::update() {
-  int presence = hu->smHumanData(hu->eHumanPresence);
-  int movement = hu->smHumanData(hu->eHumanMovement);
-  int moving_range = hu->smHumanData(hu->eHumanMovingRange);
-  int breathe_value = hu->getBreatheValue();
-  int heart_rate = hu->getHeartRate();
-
-  if (presence_sensor_ != nullptr) presence_sensor_->publish_state(presence);
-  if (movement_sensor_ != nullptr) movement_sensor_->publish_state(movement);
-  if (moving_range_sensor_ != nullptr) moving_range_sensor_->publish_state(moving_range);
-  if (breathe_value_sensor_ != nullptr) breathe_value_sensor_->publish_state(breathe_value);
-  if (heart_rate_sensor_ != nullptr) heart_rate_sensor_->publish_state(heart_rate);
+  if (this->presence_sensor_ != nullptr) {
+    int presence = this->human_detection->smHumanData(DFRobot_HumanDetection::eHumanPresence);
+    this->presence_sensor_->publish_state(presence);
+  }
+  if (this->movement_sensor_ != nullptr) {
+    int movement = this->human_detection->smHumanData(DFRobot_HumanDetection::eHumanMovement);
+    this->movement_sensor_->publish_state(movement);
+  }
+  if (this->moving_range_sensor_ != nullptr) {
+    int moving_range = this->human_detection->smHumanData(DFRobot_HumanDetection::eHumanMovingRange);
+    this->moving_range_sensor_->publish_state(moving_range);
+  }
 }
 
 void DFRobotC1001Component::dump_config() {
@@ -44,10 +37,6 @@ void DFRobotC1001Component::dump_config() {
   LOG_SENSOR("  ", "Presence", this->presence_sensor_);
   LOG_SENSOR("  ", "Movement", this->movement_sensor_);
   LOG_SENSOR("  ", "Moving Range", this->moving_range_sensor_);
-  LOG_SENSOR("  ", "Respiration Rate", this->breathe_value_sensor_);
-  LOG_SENSOR("  ", "Heart Rate", this->heart_rate_sensor_);
-  LOG_NUMBER("  ", "Height", this->height_number_);
-  LOG_SWITCH("  ", "Work Mode", this->work_mode_switch_);
 }
 
 }  // namespace dfrobot_c1001
