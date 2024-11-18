@@ -16,14 +16,13 @@ void DFRobotC1001Component::setup() {
   }
   ESP_LOGI(TAG, "Initialization successful");
 
-  while (hu->configWorkMode(hu->eSleepMode) != 0) {
-    ESP_LOGE(TAG, "Work mode switch error!!!");
-    delay(1000);
+  if (height_number_ != nullptr) {
+    hu->dmInstallHeight(static_cast<uint16_t>(height_number_->state));
   }
-  ESP_LOGI(TAG, "Work mode switch successful");
 
-  hu->configLEDLight(hu->eHPLed, 1);
-  hu->sensorRet();
+  if (work_mode_switch_ != nullptr) {
+    hu->configWorkMode(work_mode_switch_->state ? hu->eSleepMode : hu->eNormalMode);
+  }
 }
 
 void DFRobotC1001Component::update() {
@@ -47,6 +46,8 @@ void DFRobotC1001Component::dump_config() {
   LOG_SENSOR("  ", "Moving Range", this->moving_range_sensor_);
   LOG_SENSOR("  ", "Respiration Rate", this->breathe_value_sensor_);
   LOG_SENSOR("  ", "Heart Rate", this->heart_rate_sensor_);
+  LOG_NUMBER("  ", "Height", this->height_number_);
+  LOG_SWITCH("  ", "Work Mode", this->work_mode_switch_);
 }
 
 }  // namespace dfrobot_c1001
