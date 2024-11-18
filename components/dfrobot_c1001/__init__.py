@@ -3,20 +3,21 @@ import esphome.config_validation as cv
 from esphome.components import uart, sensor, switch, number
 from esphome.const import CONF_ID, UNIT_EMPTY, ICON_EMPTY, DEVICE_CLASS_EMPTY
 
-DEPENDENCIES = ["uart"]
-
-dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
-DFRobotC1001Component = dfrobot_c1001_ns.class_(
-    "DFRobotC1001Component", cg.PollingComponent, uart.UARTDevice
-)
-
+# Define custom constants here
 CONF_PRESENCE = "presence"
 CONF_MOVEMENT = "movement"
 CONF_MOVING_RANGE = "moving_range"
 CONF_BREATHE_VALUE = "breathe_value"
 CONF_HEART_RATE = "heart_rate"
 CONF_HEIGHT = "height"
-CONF_WORK_MODE = "work_mode"
+CONF_WORK_MODE = "work_mode"  # Custom constant for your component
+
+DEPENDENCIES = ["uart"]
+
+dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
+DFRobotC1001Component = dfrobot_c1001_ns.class_(
+    "DFRobotC1001Component", cg.PollingComponent, uart.UARTDevice
+)
 
 CONFIG_SCHEMA = (
     cv.Schema({
