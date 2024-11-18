@@ -3,14 +3,14 @@ import esphome.config_validation as cv
 from esphome.components import uart, sensor, switch, number
 from esphome.const import CONF_ID, UNIT_EMPTY, ICON_EMPTY, DEVICE_CLASS_EMPTY
 
-# Define custom constants here
+# Define custom constants
 CONF_PRESENCE = "presence"
 CONF_MOVEMENT = "movement"
 CONF_MOVING_RANGE = "moving_range"
 CONF_BREATHE_VALUE = "breathe_value"
 CONF_HEART_RATE = "heart_rate"
 CONF_HEIGHT = "height"
-CONF_WORK_MODE = "work_mode"  # Define the custom constant
+CONF_WORK_MODE = "work_mode"  # Custom constant
 
 DEPENDENCIES = ["uart"]
 
