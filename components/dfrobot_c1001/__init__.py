@@ -10,7 +10,7 @@ CONF_MOVING_RANGE = "moving_range"
 CONF_BREATHE_VALUE = "breathe_value"
 CONF_HEART_RATE = "heart_rate"
 CONF_HEIGHT = "height"
-CONF_WORK_MODE = "work_mode"  # Custom constant for your component
+CONF_WORK_MODE = "work_mode"  # Define the custom constant
 
 DEPENDENCIES = ["uart"]
 
