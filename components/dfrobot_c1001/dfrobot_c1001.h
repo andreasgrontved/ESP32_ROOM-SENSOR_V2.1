@@ -1,15 +1,21 @@
 #pragma once
 
-#include "esphome.h"
+#include "esphome/components/uart/uart.h"
+#include "esphome/core/component.h"
+#include "esphome/components/sensor/sensor.h"
 #include "DFRobot_HumanDetection.h"
 
 namespace esphome {
-class DFRobotC1001 : public PollingComponent {
- public:
-  explicit DFRobotC1001(UARTComponent *uart);
-  void setup() override;
-  void update() override;
 
+class DFRobotC1001 : public uart::UARTDevice, public Component {
+ public:
+  // Constructor
+  explicit DFRobotC1001(uart::UARTComponent *parent);
+
+  void setup() override;   // Called during initialization
+  void loop() override;    // Called repeatedly to check for data
+
+  // Sensors
   Sensor *presence_sensor = new Sensor();
   Sensor *motion_sensor = new Sensor();
   Sensor *movement_param_sensor = new Sensor();
@@ -17,6 +23,7 @@ class DFRobotC1001 : public PollingComponent {
   Sensor *heart_rate_sensor = new Sensor();
 
  private:
-  DFRobot_HumanDetection hu_;
+  DFRobot_HumanDetection hu_;  // Instance of the library
 };
+
 }  // namespace esphome
