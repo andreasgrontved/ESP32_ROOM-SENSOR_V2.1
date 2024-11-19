@@ -14,9 +14,9 @@ CONF_MOVEMENT_PARAM_SENSOR = "movement_param_sensor"
 CONF_RESPIRATION_RATE_SENSOR = "respiration_rate_sensor"
 CONF_HEART_RATE_SENSOR = "heart_rate_sensor"
 
-# Define the dfrobot_c1001 component schema
+# Configuration schema
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(DFRobotC1001),
+    cv.GenerateID(): cv.declare_id(DFRobotC1001),  # Match C++ class name
     cv.Optional(CONF_PRESENCE_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
     cv.Optional(CONF_MOTION_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
     cv.Optional(CONF_MOVEMENT_PARAM_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
@@ -24,12 +24,9 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_HEART_RATE_SENSOR): sensor.sensor_schema("beats/min", ICON_EMPTY, 1),
 }).extend(uart.UART_DEVICE_SCHEMA)
 
-# Register the component with ESPHome
-CONFIG_FILENAME = "dfrobot_c1001"  # Ensure this matches the YAML name
-
 async def to_code(config):
-    # Create the component instance
-    var = cg.new_Pvariable(config[CONF_ID])
+    # Create component instance
+    var = cg.new_Pvariable(config[CONF_ID])  # Matches C++ class name
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
 
