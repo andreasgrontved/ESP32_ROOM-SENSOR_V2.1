@@ -1,11 +1,11 @@
 #pragma once
 
 #include "esphome.h"
-#include "DFRobot_HumanDetection.h"
+#include "DFRobot_HumanDetection.h"  // Include the library
 
 class DFRobotC1001 : public PollingComponent {
  public:
-  DFRobotC1001(UARTComponent *uart) : PollingComponent(1000), hu_(uart->get_uart()) {}
+  explicit DFRobotC1001(UARTComponent *uart) : PollingComponent(1000), hu_(uart->get_uart()) {}
 
   void setup() override;
   void update() override;
@@ -17,6 +17,5 @@ class DFRobotC1001 : public PollingComponent {
   Sensor *heart_rate_sensor = new Sensor();
 
  private:
-  DFRobot_HumanDetection hu_;
+  DFRobot_HumanDetection hu_;  // Library object
 };
-

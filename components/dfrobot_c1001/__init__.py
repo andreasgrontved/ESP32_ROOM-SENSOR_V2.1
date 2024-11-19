@@ -4,5 +4,5 @@ import esphome.config_validation as cv
 
 DEPENDENCIES = ["uart"]
 
-CODEOWNERS = ["@your_username"]  # Optional, for maintainership
+CODEOWNERS = ["@your_username"]  # Optional
 MULTI_CONF = True
