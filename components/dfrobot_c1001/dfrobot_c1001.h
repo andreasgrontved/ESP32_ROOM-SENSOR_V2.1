@@ -6,10 +6,11 @@
 #include "DFRobot_HumanDetection.h"
 
 namespace esphome {
+namespace dfrobot_c1001 {
 
-class dfrobot_c1001 : public uart::UARTDevice, public Component {
+class DFRobotC1001Component : public uart::UARTDevice, public Component {
  public:
-  explicit dfrobot_c1001(uart::UARTComponent *parent);
+  explicit DFRobotC1001Component(uart::UARTComponent *parent);
   void setup() override;
   void loop() override;
 
@@ -29,4 +30,5 @@ class dfrobot_c1001 : public uart::UARTDevice, public Component {
   DFRobot_HumanDetection hu_;
 };
 
+}  // namespace dfrobot_c1001
 }  // namespace esphome

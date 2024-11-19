@@ -5,7 +5,7 @@ from esphome.const import CONF_ID, UNIT_EMPTY, ICON_EMPTY
 
 # Define namespace and class
 dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
-dfrobot_c1001 = dfrobot_c1001_ns.class_("dfrobot_c1001", uart.UARTDevice, cg.Component)
+DFRobotC1001Component = dfrobot_c1001_ns.class_("DFRobotC1001Component", uart.UARTDevice, cg.Component)
 
 # Define sensor configuration keys
 CONF_PRESENCE_SENSOR = "presence_sensor"
@@ -16,7 +16,7 @@ CONF_HEART_RATE_SENSOR = "heart_rate_sensor"
 
 # Configuration schema
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(dfrobot_c1001),  # Match C++ class name
+    cv.GenerateID(): cv.declare_id(DFRobotC1001Component),  # Match C++ class name
     cv.Optional(CONF_PRESENCE_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
     cv.Optional(CONF_MOTION_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
     cv.Optional(CONF_MOVEMENT_PARAM_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),

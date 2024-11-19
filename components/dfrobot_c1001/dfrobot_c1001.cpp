@@ -2,10 +2,11 @@
 #include "esphome/core/log.h"
 
 namespace esphome {
+namespace dfrobot_c1001 {
 
-dfrobot_c1001::dfrobot_c1001(uart::UARTComponent *parent) : UARTDevice(parent), hu_(&parent->get_uart()) {}
+DFRobotC1001Component::DFRobotC1001Component(uart::UARTComponent *parent) : UARTDevice(parent), hu_(&parent->get_uart()) {}
 
-void dfrobot_c1001::setup() {
+void DFRobotC1001Component::setup() {
   ESP_LOGI("DFRobotC1001", "Initializing DFRobot C1001...");
   while (this->hu_.begin() != 0) {
     ESP_LOGE("DFRobotC1001", "Initialization failed! Retrying...");
@@ -17,7 +18,7 @@ void dfrobot_c1001::setup() {
   this->hu_.sensorRet();
 }
 
-void dfrobot_c1001::loop() {
+void DFRobotC1001Component::loop() {
   if (this->presence_sensor_ != nullptr) {
     this->presence_sensor_->publish_state(this->hu_.smHumanData(this->hu_.eHumanPresence));
   }
@@ -32,7 +33,7 @@ void dfrobot_c1001::loop() {
   }
   if (this->heart_rate_sensor_ != nullptr) {
     this->heart_rate_sensor_->publish_state(this->hu_.getHeartRate());
-  }
 }
 
+}  // namespace dfrobot_c1001
 }  // namespace esphome
