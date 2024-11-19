@@ -1,43 +1,45 @@
 #include "dfrobot_c1001.h"
-#include "esphome/core/log.h"
 
-namespace esphome {
-namespace dfrobot_c1001 {
+void DFRobotC1001::setup() {
+  ESP_LOGI("DFRobotC1001", "Initializing DFRobot C1001...");
 
-static const char *const TAG = "dfrobot_c1001";
-
-void DFRobotC1001Component::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up DFRobot C1001...");
-  this->human_detection = new DFRobot_HumanDetection(&Serial1);
-
-  if (this->human_detection->begin() == 0) {
-    ESP_LOGI(TAG, "DFRobot C1001 initialized successfully.");
-  } else {
-    ESP_LOGE(TAG, "Failed to initialize DFRobot C1001.");
+  while (this->hu_.begin() != 0) {
+    ESP_LOGE("DFRobotC1001", "Initialization failed! Retrying...");
+    delay(1000);
   }
+
+  ESP_LOGI("DFRobotC1001", "Initialization successful!");
+
+  // Configure work mode
+  while (this->hu_.configWorkMode(this->hu_.eSleepMode) != 0) {
+    ESP_LOGE("DFRobotC1001", "Failed to configure sleep mode! Retrying...");
+    delay(1000);
+  }
+
+  this->hu_.configLEDLight(this->hu_.eHPLed, 1);  // Enable HP LED
+  this->hu_.sensorRet();  // Reset the sensor to apply configuration
 }
 
-void DFRobotC1001Component::update() {
-  if (this->presence_sensor_ != nullptr) {
-    int presence = this->human_detection->smHumanData(DFRobot_HumanDetection::eHumanPresence);
-    this->presence_sensor_->publish_state(presence);
-  }
-  if (this->movement_sensor_ != nullptr) {
-    int movement = this->human_detection->smHumanData(DFRobot_HumanDetection::eHumanMovement);
-    this->movement_sensor_->publish_state(movement);
-  }
-  if (this->moving_range_sensor_ != nullptr) {
-    int moving_range = this->human_detection->smHumanData(DFRobot_HumanDetection::eHumanMovingRange);
-    this->moving_range_sensor_->publish_state(moving_range);
-  }
-}
+void DFRobotC1001::update() {
+  // Read and publish human presence
+  int presence = this->hu_.smHumanData(this->hu_.eHumanPresence);
+  this->presence_sensor->publish_state(presence);
 
-void DFRobotC1001Component::dump_config() {
-  ESP_LOGCONFIG(TAG, "DFRobot C1001:");
-  LOG_SENSOR("  ", "Presence", this->presence_sensor_);
-  LOG_SENSOR("  ", "Movement", this->movement_sensor_);
-  LOG_SENSOR("  ", "Moving Range", this->moving_range_sensor_);
-}
+  // Read and publish motion information
+  int motion = this->hu_.smHumanData(this->hu_.eHumanMovement);
+  this->motion_sensor->publish_state(motion);
 
-}  // namespace dfrobot_c1001
-}  // namespace esphome
+  // Read and publish body movement parameter
+  int movement_param = this->hu_.smHumanData(this->hu_.eHumanMovingRange);
+  this->movement_param_sensor->publish_state(movement_param);
+
+  // Read and publish respiration rate
+  int respiration_rate = this->hu_.getBreatheValue();
+  this->respiration_rate_sensor->publish_state(respiration_rate);
+
+  // Read and publish heart rate
+  int heart_rate = this->hu_.gitHeartRate();
+  this->heart_rate_sensor->publish_state(heart_rate);
+
+  ESP_LOGI("DFRobotC1001", "Sensor data updated.");
+}
