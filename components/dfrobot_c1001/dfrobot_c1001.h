@@ -3,10 +3,10 @@
 #include "esphome.h"
 #include "DFRobot_HumanDetection.h"
 
+namespace esphome {
 class DFRobotC1001 : public PollingComponent {
  public:
-  explicit DFRobotC1001(UARTComponent *uart) : PollingComponent(1000), hu_(uart->get_uart()) {}
-
+  explicit DFRobotC1001(UARTComponent *uart);
   void setup() override;
   void update() override;
 
@@ -19,3 +19,4 @@ class DFRobotC1001 : public PollingComponent {
  private:
   DFRobot_HumanDetection hu_;
 };
+}  // namespace esphome
