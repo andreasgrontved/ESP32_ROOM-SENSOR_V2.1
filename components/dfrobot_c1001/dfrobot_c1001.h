@@ -1,7 +1,7 @@
 #pragma once
 
 #include "esphome.h"
-#include "DFRobot_HumanDetection.h"  // Include the library
+#include "DFRobot_HumanDetection.h"
 
 class DFRobotC1001 : public PollingComponent {
  public:
@@ -17,5 +17,5 @@ class DFRobotC1001 : public PollingComponent {
   Sensor *heart_rate_sensor = new Sensor();
 
  private:
-  DFRobot_HumanDetection hu_;  // Library object
+  DFRobot_HumanDetection hu_;
 };
