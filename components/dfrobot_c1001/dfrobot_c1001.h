@@ -7,9 +7,9 @@
 
 namespace esphome {
 
-class DFRobotC1001 : public uart::UARTDevice, public Component {
+class dfrobot_c1001 : public uart::UARTDevice, public Component {
  public:
-  explicit DFRobotC1001(uart::UARTComponent *parent);
+  explicit dfrobot_c1001(uart::UARTComponent *parent);
   void setup() override;
   void loop() override;
 

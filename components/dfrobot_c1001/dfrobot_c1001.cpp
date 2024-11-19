@@ -2,7 +2,7 @@
 
 namespace esphome {
 
-DFRobotC1001::DFRobotC1001(uart::UARTComponent *parent) : UARTDevice(parent), hu_(&parent->get_uart()) {}
+dfrobot_c1001::dfrobot_c1001(uart::UARTComponent *parent) : UARTDevice(parent), hu_(&parent->get_uart()) {}
 
 void DFRobotC1001::setup() {
   ESP_LOGI("DFRobotC1001", "Initializing DFRobot C1001...");
@@ -16,7 +16,7 @@ void DFRobotC1001::setup() {
   this->hu_.sensorRet();
 }
 
-void DFRobotC1001::loop() {
+void dfrobot_c1001::loop() {
   if (this->presence_sensor_ != nullptr) {
     this->presence_sensor_->publish_state(this->hu_.smHumanData(this->hu_.eHumanPresence));
   }
