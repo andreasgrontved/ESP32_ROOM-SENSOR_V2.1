@@ -7,26 +7,28 @@ from esphome.const import CONF_ID, UNIT_EMPTY, ICON_EMPTY
 dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
 DFRobotC1001 = dfrobot_c1001_ns.class_("DFRobotC1001", uart.UARTDevice, cg.Component)
 
-# Define sensor options
+# Define sensor configuration keys
 CONF_PRESENCE_SENSOR = "presence_sensor"
 CONF_MOTION_SENSOR = "motion_sensor"
 CONF_MOVEMENT_PARAM_SENSOR = "movement_param_sensor"
 CONF_RESPIRATION_RATE_SENSOR = "respiration_rate_sensor"
 CONF_HEART_RATE_SENSOR = "heart_rate_sensor"
 
-CONFIG_SCHEMA = cv.Schema(
-    {
-        cv.GenerateID(): cv.declare_id(DFRobotC1001),
-        cv.Optional(CONF_PRESENCE_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
-        cv.Optional(CONF_MOTION_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
-        cv.Optional(CONF_MOVEMENT_PARAM_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
-        cv.Optional(CONF_RESPIRATION_RATE_SENSOR): sensor.sensor_schema("breaths/min", ICON_EMPTY, 1),
-        cv.Optional(CONF_HEART_RATE_SENSOR): sensor.sensor_schema("beats/min", ICON_EMPTY, 1),
-    }
-).extend(uart.UART_DEVICE_SCHEMA)
+# Define the dfrobot_c1001 component schema
+CONFIG_SCHEMA = cv.Schema({
+    cv.GenerateID(): cv.declare_id(DFRobotC1001),
+    cv.Optional(CONF_PRESENCE_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
+    cv.Optional(CONF_MOTION_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
+    cv.Optional(CONF_MOVEMENT_PARAM_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
+    cv.Optional(CONF_RESPIRATION_RATE_SENSOR): sensor.sensor_schema("breaths/min", ICON_EMPTY, 1),
+    cv.Optional(CONF_HEART_RATE_SENSOR): sensor.sensor_schema("beats/min", ICON_EMPTY, 1),
+}).extend(uart.UART_DEVICE_SCHEMA)
+
+# Register the component with ESPHome
+CONFIG_FILENAME = "dfrobot_c1001"  # Ensure this matches the YAML name
 
 async def to_code(config):
-    # Create component instance
+    # Create the component instance
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
