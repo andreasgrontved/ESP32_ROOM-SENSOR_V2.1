@@ -19,3 +19,4 @@ class DFRobotC1001 : public PollingComponent {
  private:
   DFRobot_HumanDetection hu_;
 };
+
