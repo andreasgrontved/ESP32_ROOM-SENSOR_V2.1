@@ -17,12 +17,21 @@ void DFRobotC1001::setup() {
 }
 
 void DFRobotC1001::loop() {
-  this->presence_sensor->publish_state(this->hu_.smHumanData(this->hu_.eHumanPresence));
-  this->motion_sensor->publish_state(this->hu_.smHumanData(this->hu_.eHumanMovement));
-  this->movement_param_sensor->publish_state(this->hu_.smHumanData(this->hu_.eHumanMovingRange));
-  this->respiration_rate_sensor->publish_state(this->hu_.getBreatheValue());
-  this->heart_rate_sensor->publish_state(this->hu_.gitHeartRate());
+  if (this->presence_sensor_ != nullptr) {
+    this->presence_sensor_->publish_state(this->hu_.smHumanData(this->hu_.eHumanPresence));
+  }
+  if (this->motion_sensor_ != nullptr) {
+    this->motion_sensor_->publish_state(this->hu_.smHumanData(this->hu_.eHumanMovement));
+  }
+  if (this->movement_param_sensor_ != nullptr) {
+    this->movement_param_sensor_->publish_state(this->hu_.smHumanData(this->hu_.eHumanMovingRange));
+  }
+  if (this->respiration_rate_sensor_ != nullptr) {
+    this->respiration_rate_sensor_->publish_state(this->hu_.getBreatheValue());
+  }
+  if (this->heart_rate_sensor_ != nullptr) {
+    this->heart_rate_sensor_->publish_state(this->hu_.gitHeartRate());
+  }
 }
 
 }  // namespace esphome
-

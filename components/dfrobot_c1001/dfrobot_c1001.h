@@ -13,15 +13,20 @@ class DFRobotC1001 : public uart::UARTDevice, public Component {
   void setup() override;
   void loop() override;
 
-  // Sensors
-  Sensor *presence_sensor = new Sensor();
-  Sensor *motion_sensor = new Sensor();
-  Sensor *movement_param_sensor = new Sensor();
-  Sensor *respiration_rate_sensor = new Sensor();
-  Sensor *heart_rate_sensor = new Sensor();
+  void set_presence_sensor(sensor::Sensor *presence_sensor) { presence_sensor_ = presence_sensor; }
+  void set_motion_sensor(sensor::Sensor *motion_sensor) { motion_sensor_ = motion_sensor; }
+  void set_movement_param_sensor(sensor::Sensor *movement_param_sensor) { movement_param_sensor_ = movement_param_sensor; }
+  void set_respiration_rate_sensor(sensor::Sensor *respiration_rate_sensor) { respiration_rate_sensor_ = respiration_rate_sensor; }
+  void set_heart_rate_sensor(sensor::Sensor *heart_rate_sensor) { heart_rate_sensor_ = heart_rate_sensor; }
 
  private:
-  DFRobot_HumanDetection hu_;  // Library instance
+  sensor::Sensor *presence_sensor_{nullptr};
+  sensor::Sensor *motion_sensor_{nullptr};
+  sensor::Sensor *movement_param_sensor_{nullptr};
+  sensor::Sensor *respiration_rate_sensor_{nullptr};
+  sensor::Sensor *heart_rate_sensor_{nullptr};
+
+  DFRobot_HumanDetection hu_;
 };
 
 }  // namespace esphome

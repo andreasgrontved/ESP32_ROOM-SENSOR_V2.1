@@ -7,30 +7,47 @@ from esphome.const import CONF_ID, UNIT_EMPTY, ICON_EMPTY
 dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
 DFRobotC1001 = dfrobot_c1001_ns.class_("DFRobotC1001", uart.UARTDevice, cg.Component)
 
-# Sensor configurations
-SENSORS = [
-    ("presence_sensor", "Human Presence", UNIT_EMPTY, ICON_EMPTY),
-    ("motion_sensor", "Motion Information", UNIT_EMPTY, ICON_EMPTY),
-    ("movement_param_sensor", "Body Movement Parameter", UNIT_EMPTY, ICON_EMPTY),
-    ("respiration_rate_sensor", "Respiration Rate", "breaths/min", ICON_EMPTY),
-    ("heart_rate_sensor", "Heart Rate", "beats/min", ICON_EMPTY),
-]
+# Define sensor options
+CONF_PRESENCE_SENSOR = "presence_sensor"
+CONF_MOTION_SENSOR = "motion_sensor"
+CONF_MOVEMENT_PARAM_SENSOR = "movement_param_sensor"
+CONF_RESPIRATION_RATE_SENSOR = "respiration_rate_sensor"
+CONF_HEART_RATE_SENSOR = "heart_rate_sensor"
 
-# Configuration schema
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(DFRobotC1001),
+        cv.Optional(CONF_PRESENCE_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
+        cv.Optional(CONF_MOTION_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
+        cv.Optional(CONF_MOVEMENT_PARAM_SENSOR): sensor.sensor_schema(UNIT_EMPTY, ICON_EMPTY, 1),
+        cv.Optional(CONF_RESPIRATION_RATE_SENSOR): sensor.sensor_schema("breaths/min", ICON_EMPTY, 1),
+        cv.Optional(CONF_HEART_RATE_SENSOR): sensor.sensor_schema("beats/min", ICON_EMPTY, 1),
     }
 ).extend(uart.UART_DEVICE_SCHEMA)
 
-# Code generation logic
 async def to_code(config):
-    # Create an instance of the component
+    # Create component instance
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
 
     # Register sensors explicitly
-    for sensor_key, name, unit, icon in SENSORS:
-        sens = cg.new_Pvariable(getattr(DFRobotC1001, sensor_key), var)
-        await sensor.register_sensor(sens, config, name, unit, icon)
+    if CONF_PRESENCE_SENSOR in config:
+        sens = await sensor.new_sensor(config[CONF_PRESENCE_SENSOR])
+        cg.add(var.set_presence_sensor(sens))
+
+    if CONF_MOTION_SENSOR in config:
+        sens = await sensor.new_sensor(config[CONF_MOTION_SENSOR])
+        cg.add(var.set_motion_sensor(sens))
+
+    if CONF_MOVEMENT_PARAM_SENSOR in config:
+        sens = await sensor.new_sensor(config[CONF_MOVEMENT_PARAM_SENSOR])
+        cg.add(var.set_movement_param_sensor(sens))
+
+    if CONF_RESPIRATION_RATE_SENSOR in config:
+        sens = await sensor.new_sensor(config[CONF_RESPIRATION_RATE_SENSOR])
+        cg.add(var.set_respiration_rate_sensor(sens))
+
+    if CONF_HEART_RATE_SENSOR in config:
+        sens = await sensor.new_sensor(config[CONF_HEART_RATE_SENSOR])
+        cg.add(var.set_heart_rate_sensor(sens))
