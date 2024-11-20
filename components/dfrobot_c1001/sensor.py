@@ -1,32 +1,26 @@
-
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor, uart
-from esphome.const import CONF_ID, CONF_NAME, UNIT_NONE, ICON_EMPTY
+from esphome.const import CONF_ID, UNIT_NONE, ICON_EMPTY, CONF_NAME
 
 DEPENDENCIES = ["uart"]
 
 dfrobot_c1001_ns = cg.esphome_ns.namespace("dfrobot_c1001")
 DFRobotC1001 = dfrobot_c1001_ns.class_("DFRobotC1001Component", cg.PollingComponent, uart.UARTDevice)
 
-CONF_PRESENCE = "presence_sensor"
-CONF_MOTION = "motion_sensor"
-CONF_DISTANCE = "distance_sensor"
-CONF_ENERGY = "energy_sensor"
-
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(DFRobotC1001),
-        cv.Optional(CONF_PRESENCE): sensor.sensor_schema(
+        cv.Optional("presence_sensor"): sensor.sensor_schema(
             unit_of_measurement=UNIT_NONE, icon=ICON_EMPTY, accuracy_decimals=0
         ),
-        cv.Optional(CONF_MOTION): sensor.sensor_schema(
+        cv.Optional("motion_sensor"): sensor.sensor_schema(
             unit_of_measurement=UNIT_NONE, icon=ICON_EMPTY, accuracy_decimals=0
         ),
-        cv.Optional(CONF_DISTANCE): sensor.sensor_schema(
-            unit_of_measurement="cm", icon=ICON_EMPTY, accuracy_decimals=0
+        cv.Optional("distance_sensor"): sensor.sensor_schema(
+            unit_of_measurement="cm", icon=ICON_EMPTY, accuracy_decimals=2
         ),
-        cv.Optional(CONF_ENERGY): sensor.sensor_schema(
+        cv.Optional("energy_sensor"): sensor.sensor_schema(
             unit_of_measurement=UNIT_NONE, icon=ICON_EMPTY, accuracy_decimals=0
         ),
     }
@@ -37,15 +31,15 @@ async def to_code(config):
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
 
-    if CONF_PRESENCE in config:
-        sens = await sensor.new_sensor(config[CONF_PRESENCE])
+    if "presence_sensor" in config:
+        sens = await sensor.new_sensor(config["presence_sensor"])
         cg.add(var.set_presence_sensor(sens))
-    if CONF_MOTION in config:
-        sens = await sensor.new_sensor(config[CONF_MOTION])
+    if "motion_sensor" in config:
+        sens = await sensor.new_sensor(config["motion_sensor"])
         cg.add(var.set_motion_sensor(sens))
-    if CONF_DISTANCE in config:
-        sens = await sensor.new_sensor(config[CONF_DISTANCE])
+    if "distance_sensor" in config:
+        sens = await sensor.new_sensor(config["distance_sensor"])
         cg.add(var.set_distance_sensor(sens))
-    if CONF_ENERGY in config:
-        sens = await sensor.new_sensor(config[CONF_ENERGY])
+    if "energy_sensor" in config:
+        sens = await sensor.new_sensor(config["energy_sensor"])
         cg.add(var.set_energy_sensor(sens))
