@@ -1,38 +1,50 @@
+
 #include "dfrobot_c1001.h"
-#include "esphome/core/log.h"
 
 namespace esphome {
 namespace dfrobot_c1001 {
 
-DFRobotC1001Component::DFRobotC1001Component(uart::UARTComponent *parent) : UARTDevice(parent), hu_(&parent->get_uart()) {}
-
 void DFRobotC1001Component::setup() {
-  ESP_LOGI("DFRobotC1001", "Initializing DFRobot C1001...");
-  while (this->hu_.begin() != 0) {
-    ESP_LOGE("DFRobotC1001", "Initialization failed! Retrying...");
-    delay(1000);
+  this->sensor_ = new DFRobot_HumanDetection(&Serial1);
+  if (!this->sensor_->begin()) {
+    ESP_LOGE("DFRobot_C1001", "Sensor initialization failed!");
   }
-  ESP_LOGI("DFRobotC1001", "Initialization successful!");
-  this->hu_.configWorkMode(this->hu_.eSleepMode);
-  this->hu_.configLEDLight(this->hu_.eHPLed, 1);
-  this->hu_.sensorRet();
 }
 
-void DFRobotC1001Component::loop() {
-  if (this->presence_sensor_ != nullptr) {
-    this->presence_sensor_->publish_state(this->hu_.smHumanData(this->hu_.eHumanPresence));
+void DFRobotC1001Component::update() {
+  if (this->sensor_ != nullptr) {
+    uint16_t presence = this->sensor_->smHumanData(DFRobot_HumanDetection::eHumanPresence);
+    uint16_t motion = this->sensor_->smHumanData(DFRobot_HumanDetection::eHumanMovement);
+    uint16_t distance = this->sensor_->smHumanData(DFRobot_HumanDetection::eHumanDistance);
+    uint16_t energy = this->sensor_->smHumanData(DFRobot_HumanDetection::eHumanMovingRange);
+
+    if (this->presence_sensor_ != nullptr)
+      this->presence_sensor_->publish_state(presence);
+    if (this->motion_sensor_ != nullptr)
+      this->motion_sensor_->publish_state(motion);
+    if (this->distance_sensor_ != nullptr)
+      this->distance_sensor_->publish_state(distance);
+    if (this->energy_sensor_ != nullptr)
+      this->energy_sensor_->publish_state(energy);
+
+    // Installation height (if configured)
+    if (this->installation_height_number_ != nullptr) {
+      uint16_t height = this->sensor_->dmGetInstallHeight();
+      this->installation_height_number_->publish_state(height);
+    }
+
+    // Fall detection switch state (if configured)
+    if (this->fall_detection_switch_ != nullptr) {
+      bool fall_state = this->sensor_->getFallData(DFRobot_HumanDetection::eFallState);
+      this->fall_detection_switch_->publish_state(fall_state);
+    }
+
+    // Sleep mode selector state (if configured)
+    if (this->sleep_mode_select_ != nullptr) {
+      uint8_t mode = this->sensor_->getWorkMode();
+      this->sleep_mode_select_->publish_state(mode == DFRobot_HumanDetection::eSleepMode ? "Sleep" : "Falling");
+    }
   }
-  if (this->motion_sensor_ != nullptr) {
-    this->motion_sensor_->publish_state(this->hu_.smHumanData(this->hu_.eHumanMovement));
-  }
-  if (this->movement_param_sensor_ != nullptr) {
-    this->movement_param_sensor_->publish_state(this->hu_.smHumanData(this->hu_.eHumanMovingRange));
-  }
-  if (this->respiration_rate_sensor_ != nullptr) {
-    this->respiration_rate_sensor_->publish_state(this->hu_.getBreatheValue());
-  }
-  if (this->heart_rate_sensor_ != nullptr) {
-    this->heart_rate_sensor_->publish_state(this->hu_.getHeartRate());
 }
 
 }  // namespace dfrobot_c1001
